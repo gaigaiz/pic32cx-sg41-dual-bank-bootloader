@@ -140,13 +140,9 @@ void SYS_Initialize ( void* data )
             run_Application(APP_START_ADDRESS);
         }
     }
-    else
-    {
-        /* APP actively triggered bootloader: it ran successfully, clear the
-         * boot failure counter before entering serial upgrade mode.
-         */
-        bootloader_FailureCountClear();
-    }
+    /* APP actively jumped back to bootloader: keep the failure counter so
+     * the host can read it via 0xA7. Counter is cleared only on OTA success.
+     */
 
 
     EVSYS_Initialize();
