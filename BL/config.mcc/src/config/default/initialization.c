@@ -132,7 +132,17 @@ void SYS_Initialize ( void* data )
 
     if (bootloader_Trigger() == false)
     {
-        run_Application(APP_START_ADDRESS);
+        if (bootloader_BootCheck() == true)
+        {
+            run_Application(APP_START_ADDRESS);
+        }
+    }
+    else
+    {
+        /* APP actively triggered bootloader: it ran successfully, clear the
+         * boot failure counter before entering serial upgrade mode.
+         */
+        bootloader_FailureCountClear();
     }
 
 

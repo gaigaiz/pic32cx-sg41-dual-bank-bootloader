@@ -309,13 +309,20 @@ static void command_task(void)
     }
     else if (BL_CMD_BKSWAP_RESET == input_command)
     {
-	
+        uint32_t app_crc;
+
         SERCOM4_USART_WriteByte(BL_RESP_OK);
 
         while(SERCOM4_USART_TransmitComplete() == false)
         {
             /* Nothing to do */
         }
+
+        /* Record the expected CRC of the freshly programmed inactive-bank APP
+         * and reset its failure counter before BankSwap makes it active.
+         */
+        app_crc = bootloader_CRCGenerate(INACTIVE_BANK_START + APP_START_ADDRESS, APP_REGION_SIZE);
+        bootloader_RecordAppCrc(app_crc);
 
         NVMCTRL_BankSwap();
     }

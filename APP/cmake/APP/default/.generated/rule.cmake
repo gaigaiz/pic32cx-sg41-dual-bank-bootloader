@@ -85,7 +85,7 @@ function(APP_default_link_rule target)
         "${MP_EXTRA_LD_PRE}"
         "-mprocessor=32CX1025SG41128"
         "-mno-device-startup-code"
-        "-Wl,--defsym=__MPLAB_BUILD=1${MP_EXTRA_LD_POST},--script=${APP_default_LINKER_SCRIPT},--defsym=_min_heap_size=512,--gc-sections,-Map=mem.map,--report-mem,-DROM_LENGTH=0x7e000,-DROM_ORIGIN=0x2000,-DRAM_ORIGIN=0x20000010,-DRAM_LENGTH=0x3fff0,--memorysummary,memoryfile.xml"
+        "-Wl,--defsym=__MPLAB_BUILD=1${MP_EXTRA_LD_POST},--script=${APP_default_LINKER_SCRIPT},--defsym=_min_heap_size=512,--gc-sections,-Map=mem.map,--report-mem,-DROM_LENGTH=0x7c000,-DROM_ORIGIN=0x2000,-DRAM_ORIGIN=0x20000010,-DRAM_LENGTH=0x3fff0,--memorysummary,memoryfile.xml"
         "-mdfp=${PACK_REPO_PATH}/Microchip/PIC32CX-SG41_DFP/1.6.172")
     list(REMOVE_ITEM options "")
     target_link_options(${target} PRIVATE "${options}")

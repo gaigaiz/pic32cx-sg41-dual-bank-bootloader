@@ -42,7 +42,7 @@
             "provider": "microchip.toolchains:xc32@5.10",
             "properties": {
                 "linker.preprocessor-macros": [
-                    "ROM_LENGTH=0x7e000",
+                    "ROM_LENGTH=0x7c000",
                     "ROM_ORIGIN=0x2000",
                     "RAM_ORIGIN=0x20000010",
                     "RAM_LENGTH=0x3fff0"
