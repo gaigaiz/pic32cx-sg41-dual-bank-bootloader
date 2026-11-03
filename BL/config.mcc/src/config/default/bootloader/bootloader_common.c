@@ -158,7 +158,15 @@ static void FailSafeWrite(uint32_t addr, uint32_t expected_crc, uint32_t fail_co
     page_buffer[FAILSAFE_FAIL_COUNT_OFFSET / 4U]   = fail_count;
 
     (void) NVMCTRL_BlockErase(addr);
+    while (NVMCTRL_IsBusy())
+    {
+        /* wait for block erase complete */
+    }
     (void) NVMCTRL_PageWrite(page_buffer, addr);
+    while (NVMCTRL_IsBusy())
+    {
+        /* wait for page write complete */
+    }
 }
 
 /* Called on every cold boot with no trigger magic present.
