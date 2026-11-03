@@ -1,0 +1,16 @@
+# 构建产物
+BL/_build/
+APP/_build/
+BL/out/
+APP/out/
+
+# Python 缓存
+__pycache__/
+*.pyc
+
+# MPLAB/VSCode 本地个人配置
+.vscode/*.local.json
+
+# 临时文件
+*.tmp
+*.bak
