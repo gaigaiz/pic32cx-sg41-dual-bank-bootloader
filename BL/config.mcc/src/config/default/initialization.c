@@ -130,6 +130,9 @@ void SYS_Initialize ( void* data )
     PORT_Initialize();
 
 
+    CLOCK_Initialize();
+
+
     if (bootloader_Trigger() == false)
     {
         if (bootloader_BootCheck() == true)
@@ -145,8 +148,6 @@ void SYS_Initialize ( void* data )
         bootloader_FailureCountClear();
     }
 
-
-    CLOCK_Initialize();
 
     EVSYS_Initialize();
 

@@ -223,3 +223,14 @@ void bootloader_RecordAppCrc(uint32_t expected_crc)
 {
     FailSafeWrite(INACTIVE_BANK_START + FAILSAFE_SECTOR_ADDR, expected_crc, 0U);
 }
+
+/* Read the current boot failure counter (0xFFFFFFFF = treated as 0). */
+uint32_t bootloader_FailureCountGet(void)
+{
+    uint32_t count = *(uint32_t *)(FAILSAFE_SECTOR_ADDR + FAILSAFE_FAIL_COUNT_OFFSET);
+    if (count == 0xFFFFFFFFU)
+    {
+        count = 0U;
+    }
+    return count;
+}

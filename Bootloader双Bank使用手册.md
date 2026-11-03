@@ -808,3 +808,5 @@ python C:\Users\21891\Desktop\bootloder\Tools\inspect_hex.py C:\Users\21891\Desk
 | 镜像生成脚本 | `Tools\make_merged_bin.py` |
 | 镜像校验脚本 | `Tools\verify_merged_bin.py` |
 | HEX 排查脚本 | `Tools\inspect_hex.py` |
+
+4D 43 48 50 00 00 00 00 A6 00 00 00 00

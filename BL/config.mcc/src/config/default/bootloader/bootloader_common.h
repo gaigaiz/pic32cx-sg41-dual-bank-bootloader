@@ -333,6 +333,7 @@ void bootloader_TriggerReset(void);
 bool bootloader_BootCheck(void);
 void bootloader_FailureCountClear(void);
 void bootloader_RecordAppCrc(uint32_t expected_crc);
+uint32_t bootloader_FailureCountGet(void);
 
 
 #endif      //BOOTLOADER_COMMON_H
