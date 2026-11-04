@@ -30,7 +30,7 @@ generatedFileHashHistoryMap:
 - file: ..\src\config\default\btl.ld
   hash: e47196dc35c939e363df6223c1ab35f0f699adc90b6ac3d406bec9b88e1e465a
 - file: ..\src\config\default\definitions.h
-  hash: 3aa9c572178271fe8c0a6c93c993107ee35d8df8beacb722ef472330a43c1716
+  hash: 840e8f74bfe380737a39d76c28b7645fb1d0a2fbc87d42a259d43e6d996a544f
 - file: ..\src\config\default\device.h
   hash: 91b35f0316863234a5ee309b9c91cf2b4322df55581f6ef9339304169042fd81
 - file: ..\src\config\default\device_cache.h
@@ -81,6 +81,10 @@ generatedFileHashHistoryMap:
   hash: 0ab5b66ff8d0eaadd71ddd730aeb4f815c7e7ff21803537cab76307d9c37d10a
 - file: ..\src\config\default\peripheral\systick\plib_systick.h
   hash: 43e550acb1089f7ee29aedf3097aa66ce3e5a25c03b9794c8f230fb1dbd516dd
+- file: ..\src\config\default\peripheral\wdt\plib_wdt.c
+  hash: bdeb06539e2c25553e4ec8ca213045e89abf4c1027a528e110caacc2b689e23a
+- file: ..\src\config\default\peripheral\wdt\plib_wdt.h
+  hash: d4bb429b750e4e2970fe12d9c4eea02d2e0b1f1d30279577033555379f94e1a0
 - file: ..\src\config\default\pin_configurations.csv
   hash: d050ef2566a42489326ba63918963f4e8d8020db7d0368cec454587dd8d07ff0
 - file: ..\src\config\default\startup_xc32.c

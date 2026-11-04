@@ -29,6 +29,7 @@ set(BL_default_default_XC32_FILE_TYPE_compile
     "${CMAKE_CURRENT_SOURCE_DIR}/../../../config.mcc/src/config/default/peripheral/port/plib_port.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/../../../config.mcc/src/config/default/peripheral/sercom/usart/plib_sercom4_usart.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/../../../config.mcc/src/config/default/peripheral/systick/plib_systick.c"
+    "${CMAKE_CURRENT_SOURCE_DIR}/../../../config.mcc/src/config/default/peripheral/wdt/plib_wdt.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/../../../config.mcc/src/config/default/startup_xc32.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/../../../config.mcc/src/custom_trigger.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/../../../config.mcc/src/main.c")

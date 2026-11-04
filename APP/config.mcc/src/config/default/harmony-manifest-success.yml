@@ -4,7 +4,7 @@
 
 
 project: config_default
-creation_date: 2026-10-28T16:42:57.123+08:00[Asia/Shanghai]    # ISO 8601 format: https://www.w3.org/TR/NOTE-datetime
+creation_date: 2026-11-04T10:42:52.711+08:00[Asia/Shanghai]    # ISO 8601 format: https://www.w3.org/TR/NOTE-datetime
 operating_system: Windows 11
 mcc_mode: VSCodePlugin            # [IDE|Standalone|Headless]
 mcc_version: v5.7.1

@@ -173,8 +173,8 @@ int main ( void )
     APP_VersionBannerSend();
 
     /* 板上 LED 为低电平有效：输出低电平点亮，高电平熄灭；LED1(PC21)、LED2(PA16) 同时点亮 */
-    LED1_Clear();
-    // LED2_Clear();
+    // LED1_Clear();
+    LED2_Clear();
 
     DWT_CycleCounterInit();
 

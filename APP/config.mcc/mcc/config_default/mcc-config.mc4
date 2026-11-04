@@ -16,7 +16,7 @@ generatedFileHashHistoryMap:
 - file: ..\src\config\default\PIC32CX1025SG41128.ld
   hash: 66dc589d137f5b33969e08cdb4c2e594bcabe9bcfeb214833f343117642aa90f
 - file: ..\src\config\default\definitions.h
-  hash: 5a25328df3b4dfdc7efe019f55efb168236d7838fb220af92c20c94ffb07328f
+  hash: 2a337e37f354fb4bf30153d5e130baf3a67dd41dec69f6b1f2742e14b1943554
 - file: ..\src\config\default\device.h
   hash: 91b35f0316863234a5ee309b9c91cf2b4322df55581f6ef9339304169042fd81
 - file: ..\src\config\default\device_cache.h
@@ -63,6 +63,10 @@ generatedFileHashHistoryMap:
   hash: 05e5d58beebde6ee9922e3dd2c192792e76a2ba5443969a6696fecbd5414fbf1
 - file: ..\src\config\default\peripheral\sercom\usart\plib_sercom_usart_common.h
   hash: 3653b66472c558c50f7037a1dd25d2678e9a13aa718f3c53a2195e6f3919ea48
+- file: ..\src\config\default\peripheral\wdt\plib_wdt.c
+  hash: aee2321a82570e4e5107ee5a5e7fee8e424d8b39790e203d720662b31d42f6f7
+- file: ..\src\config\default\peripheral\wdt\plib_wdt.h
+  hash: d4bb429b750e4e2970fe12d9c4eea02d2e0b1f1d30279577033555379f94e1a0
 - file: ..\src\config\default\pin_configurations.csv
   hash: 78448a18c0766951bdcd5ad1f80f5422624fdab7dcf41b767371f823c0d68123
 - file: ..\src\config\default\startup_xc32.c

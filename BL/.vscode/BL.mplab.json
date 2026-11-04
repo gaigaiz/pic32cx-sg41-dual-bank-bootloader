@@ -86,7 +86,8 @@
                 "config.mcc/src/config/default/peripheral/systick/plib_systick.c",
                 "config.mcc/src/config/default/peripheral/sercom/usart/plib_sercom4_usart.c",
                 "config.mcc/src/config/default/peripheral/dsu/plib_dsu.c",
-                "config.mcc/src/config/default/PIC32CX1025SG41128.ld"
+                "config.mcc/src/config/default/PIC32CX1025SG41128.ld",
+                "config.mcc/src/config/default/peripheral/wdt/plib_wdt.c"
             ]
         }
     ]
