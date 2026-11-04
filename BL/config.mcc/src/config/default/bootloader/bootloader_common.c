@@ -142,10 +142,11 @@ void run_Application(uint32_t address)
 /* MISRAC 2023 deviation block end */
 
 /* Erase the 8KB state block and program one 512B page holding
- * expected CRC + APP version, rest 0xFF.
+ * expected CRC + APP version + retry_cnt + bankswapped, rest 0xFF.
  * addr: physical block address (0x7E000 active, 0xFE000 inactive).
  */
-static void FailSafeWrite(uint32_t addr, uint32_t expected_crc, uint32_t app_version)
+static void FailSafeWrite(uint32_t addr, uint32_t expected_crc, uint32_t app_version,
+                          uint32_t retry_cnt, uint32_t bankswapped)
 {
     static uint32_t page_buffer[PAGE_SIZE / 4U];
     uint32_t i;
@@ -156,6 +157,8 @@ static void FailSafeWrite(uint32_t addr, uint32_t expected_crc, uint32_t app_ver
     }
     page_buffer[FAILSAFE_EXPECTED_CRC_OFFSET / 4U] = expected_crc;
     page_buffer[FAILSAFE_APP_VERSION_OFFSET / 4U] = app_version;
+    page_buffer[FAILSAFE_RETRY_CNT_OFFSET / 4U] = retry_cnt;
+    page_buffer[FAILSAFE_BANKSWAPPED_OFFSET / 4U] = bankswapped;
 
     (void) NVMCTRL_BlockErase(addr);
     while (NVMCTRL_IsBusy())
@@ -169,6 +172,12 @@ static void FailSafeWrite(uint32_t addr, uint32_t expected_crc, uint32_t app_ver
     }
 }
 
+/* Check if the last reset was a WDT timeout. */
+static bool IsWdtReset(void)
+{
+    return ((RSTC_REGS->RSTC_RCAUSE & RSTC_RCAUSE_WDT_Msk) != 0U);
+}
+
 /* Called on every cold boot with no trigger magic present.
  * Returns true when the APP may be jumped to; false to stay in serial
  * upgrade mode.
@@ -177,6 +186,9 @@ bool bootloader_BootCheck(void)
 {
     uint32_t expected_crc;
     uint32_t actual_crc;
+    uint32_t retry_cnt;
+    uint32_t bankswapped;
+    uint32_t version;
 
     if (*(uint32_t *)APP_START_ADDRESS == 0xFFFFFFFFU)
     {
@@ -194,11 +206,50 @@ bool bootloader_BootCheck(void)
         return false;   /* APP region corrupted */
     }
 
+    version = *(uint32_t *)(FAILSAFE_SECTOR_ADDR + FAILSAFE_APP_VERSION_OFFSET);
+    if (version == 0xFFFFFFFFU)
+    {
+        version = 0U;
+    }
+    retry_cnt = *(uint32_t *)(FAILSAFE_SECTOR_ADDR + FAILSAFE_RETRY_CNT_OFFSET);
+    if (retry_cnt == 0xFFFFFFFFU)
+    {
+        retry_cnt = 0U;
+    }
+    bankswapped = *(uint32_t *)(FAILSAFE_SECTOR_ADDR + FAILSAFE_BANKSWAPPED_OFFSET);
+    if (bankswapped == 0xFFFFFFFFU)
+    {
+        bankswapped = 0U;
+    }
+
+    /* Only WDT timeout resets increment retry_cnt. POR / soft reset don't. */
+    if (IsWdtReset())
+    {
+        retry_cnt++;
+        FailSafeWrite(FAILSAFE_SECTOR_ADDR, expected_crc, version, retry_cnt, bankswapped);
+    }
+
+    /* After 3 WDT failures, bank-swap once. If the swapped bank also fails
+     * 3 times, stay in BL (both banks dead).
+     */
+    if (retry_cnt >= WDT_RETRY_THRESHOLD)
+    {
+        if (bankswapped == 0U)
+        {
+            /* First bank failure: swap to the other bank, reset retry counter. */
+            FailSafeWrite(FAILSAFE_SECTOR_ADDR, expected_crc, version, 0U, 1U);
+            NVMCTRL_BankSwap();
+            /* Will not return from here. */
+        }
+        /* Both banks failed: stay in BL. */
+        return false;
+    }
+
     return true;
 }
 
 /* End of a successful OTA, before BankSwap: store the expected CRC of the
- * freshly programmed inactive-bank APP and bump its version number.
+ * freshly programmed inactive-bank APP, bump version, clear retry_cnt / bankswapped.
  */
 void bootloader_RecordAppCrc(uint32_t expected_crc)
 {
@@ -211,7 +262,7 @@ void bootloader_RecordAppCrc(uint32_t expected_crc)
     }
     new_version = old_version + 1U;
 
-    FailSafeWrite(INACTIVE_BANK_START + FAILSAFE_SECTOR_ADDR, expected_crc, new_version);
+    FailSafeWrite(INACTIVE_BANK_START + FAILSAFE_SECTOR_ADDR, expected_crc, new_version, 0U, 0U);
 }
 
 /* Read the current APP version number (0xFFFFFFFF = treated as 0). */

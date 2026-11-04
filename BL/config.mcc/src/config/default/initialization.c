@@ -137,6 +137,8 @@ void SYS_Initialize ( void* data )
     {
         if (bootloader_BootCheck() == true)
         {
+            /* Hand WDT over to APP: disable it here so APP can start it fresh. */
+            WDT_Disable();
             run_Application(APP_START_ADDRESS);
         }
     }

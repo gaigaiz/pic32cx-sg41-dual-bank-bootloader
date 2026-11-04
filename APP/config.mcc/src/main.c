@@ -29,6 +29,63 @@
 #include "definitions.h"                // SYS function prototypes
 #include "core_cm4.h"                   // DWT cycle counter and NVIC_SystemReset
 
+/* -------------------------------------------------------------------------- */
+/* WDT + fail-safe state sector (mirrors bootloader_common.h layout)            */
+/* -------------------------------------------------------------------------- */
+#define FAILSAFE_SECTOR_ADDR                    (0x7E000UL)
+#define FAILSAFE_EXPECTED_CRC_OFFSET            (0x00U)
+#define FAILSAFE_APP_VERSION_OFFSET             (0x04U)
+#define FAILSAFE_RETRY_CNT_OFFSET               (0x08U)
+#define FAILSAFE_BANKSWAPPED_OFFSET              (0x0CU)
+#define PAGE_SIZE                               (512U)
+#define WDT_TIMEOUT_2S                          (0x8U)   /* CYC2048 @ 1.024kHz ≈ 2s */
+
+/* Erase the 8KB state block and program one 512B page, clearing retry_cnt / bankswapped.
+ * expected_crc and app_version are preserved (read back and rewritten).
+ */
+static void App_FailSafeMarkStarted(void)
+{
+    static uint32_t page_buffer[PAGE_SIZE / 4U];
+    uint32_t expected_crc;
+    uint32_t version;
+    uint32_t i;
+
+    expected_crc = *(uint32_t *)(FAILSAFE_SECTOR_ADDR + FAILSAFE_EXPECTED_CRC_OFFSET);
+    version      = *(uint32_t *)(FAILSAFE_SECTOR_ADDR + FAILSAFE_APP_VERSION_OFFSET);
+    if (version == 0xFFFFFFFFU)
+    {
+        version = 0U;
+    }
+
+    for (i = 0U; i < (PAGE_SIZE / 4U); i++)
+    {
+        page_buffer[i] = 0xFFFFFFFFU;
+    }
+    page_buffer[FAILSAFE_EXPECTED_CRC_OFFSET / 4U] = expected_crc;
+    page_buffer[FAILSAFE_APP_VERSION_OFFSET / 4U]  = version;
+    page_buffer[FAILSAFE_RETRY_CNT_OFFSET / 4U]    = 0U;
+    page_buffer[FAILSAFE_BANKSWAPPED_OFFSET / 4U]  = 0U;
+
+    (void) NVMCTRL_BlockErase(FAILSAFE_SECTOR_ADDR);
+    while (NVMCTRL_IsBusy())
+    {
+    }
+    (void) NVMCTRL_PageWrite(page_buffer, FAILSAFE_SECTOR_ADDR);
+    while (NVMCTRL_IsBusy())
+    {
+    }
+}
+
+/* Rough delay: ~2.5s at 48MHz using DWT cycle counter. */
+static void App_DelayMs(uint32_t ms)
+{
+    uint32_t ticks = ms * 48000U;
+    uint32_t start = DWT->CYCCNT;
+    while ((DWT->CYCCNT - start) < ticks)
+    {
+    }
+}
+
 // *****************************************************************************
 // Application version identification
 // *****************************************************************************
@@ -173,13 +230,28 @@ int main ( void )
     APP_VersionBannerSend();
 
     /* 板上 LED 为低电平有效：输出低电平点亮，高电平熄灭；LED1(PC21)、LED2(PA16) 同时点亮 */
-    // LED1_Clear();
+    LED1_Clear();
     LED2_Clear();
 
     DWT_CycleCounterInit();
 
+    /* ---- WDT: hand it over from BL to APP ---- */
+    WDT_TimeoutPeriodSet(WDT_TIMEOUT_2S);
+    WDT_Enable();
+    WDT_Clear();   /* feed once immediately after enable */
+
+    /* Let the APP settle for ~2.5s before marking start success.
+     * If the app crashes before this point, WDT will reset and BL counts it.
+     */
+    App_DelayMs(2500U);
+
+    /* Write success marker: clear retry_cnt and bankswapped in the state sector. */
+    App_FailSafeMarkStarted();
+
     while ( true )
     {
+        WDT_Clear();   /* feed the dog every loop */
+
         SW1_KeyTasks();
 
         /* Maintain state machines of all polled MPLAB Harmony modules. */
