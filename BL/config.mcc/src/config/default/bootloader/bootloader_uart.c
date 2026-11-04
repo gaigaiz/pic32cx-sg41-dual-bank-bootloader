@@ -83,7 +83,6 @@
 #define    BL_CMD_RESET        0xa3U
 #define    BL_CMD_BKSWAP_RESET 0xa4U
 #define    BL_CMD_READ_VERSION 0xa6U
-#define    BL_CMD_READ_FAIL_COUNT 0xa7U
 
 
 enum
@@ -280,16 +279,6 @@ static void command_task(void)
         SERCOM4_USART_WriteByte((int)btlVer);
         btlVer = (btlVersion & 0xFFU);
         SERCOM4_USART_WriteByte((int)btlVer);
-    }
-    else if (BL_CMD_READ_FAIL_COUNT == input_command)
-    {
-        uint32_t count = bootloader_FailureCountGet();
-
-        SERCOM4_USART_WriteByte(BL_RESP_OK);
-        SERCOM4_USART_WriteByte((int)(count & 0xFFU));
-        SERCOM4_USART_WriteByte((int)((count >> 8U) & 0xFFU));
-        SERCOM4_USART_WriteByte((int)((count >> 16U) & 0xFFU));
-        SERCOM4_USART_WriteByte((int)((count >> 24U) & 0xFFU));
     }
     else if (BL_CMD_VERIFY == input_command)
     {

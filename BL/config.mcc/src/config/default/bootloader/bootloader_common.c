@@ -142,10 +142,10 @@ void run_Application(uint32_t address)
 /* MISRAC 2023 deviation block end */
 
 /* Erase the 8KB state block and program one 512B page holding
- * expected CRC + failure counter, rest 0xFF.
+ * expected CRC + APP version, rest 0xFF.
  * addr: physical block address (0x7E000 active, 0xFE000 inactive).
  */
-static void FailSafeWrite(uint32_t addr, uint32_t expected_crc, uint32_t fail_count)
+static void FailSafeWrite(uint32_t addr, uint32_t expected_crc, uint32_t app_version)
 {
     static uint32_t page_buffer[PAGE_SIZE / 4U];
     uint32_t i;
@@ -155,7 +155,7 @@ static void FailSafeWrite(uint32_t addr, uint32_t expected_crc, uint32_t fail_co
         page_buffer[i] = 0xFFFFFFFFU;
     }
     page_buffer[FAILSAFE_EXPECTED_CRC_OFFSET / 4U] = expected_crc;
-    page_buffer[FAILSAFE_FAIL_COUNT_OFFSET / 4U]   = fail_count;
+    page_buffer[FAILSAFE_APP_VERSION_OFFSET / 4U] = app_version;
 
     (void) NVMCTRL_BlockErase(addr);
     while (NVMCTRL_IsBusy())
@@ -171,14 +171,12 @@ static void FailSafeWrite(uint32_t addr, uint32_t expected_crc, uint32_t fail_co
 
 /* Called on every cold boot with no trigger magic present.
  * Returns true when the APP may be jumped to; false to stay in serial
- * upgrade mode. Side effect: on a permitted jump the failure counter is
- * incremented and written back.
+ * upgrade mode.
  */
 bool bootloader_BootCheck(void)
 {
     uint32_t expected_crc;
     uint32_t actual_crc;
-    uint32_t fail_count;
 
     if (*(uint32_t *)APP_START_ADDRESS == 0xFFFFFFFFU)
     {
@@ -196,49 +194,33 @@ bool bootloader_BootCheck(void)
         return false;   /* APP region corrupted */
     }
 
-    fail_count = *(uint32_t *)(FAILSAFE_SECTOR_ADDR + FAILSAFE_FAIL_COUNT_OFFSET);
-    if (fail_count == 0xFFFFFFFFU)
-    {
-        fail_count = 0U;
-    }
-
-    if (fail_count >= BOOT_FAIL_THRESHOLD)
-    {
-        return false;   /* repeated failed boot attempts, stay in BL */
-    }
-
-    fail_count++;
-    FailSafeWrite(FAILSAFE_SECTOR_ADDR, expected_crc, fail_count);
-
     return true;
 }
 
-/* APP actively jumped back to the bootloader: it ran successfully.
- * Clear the failure counter, keep the recorded expected CRC.
- */
-void bootloader_FailureCountClear(void)
-{
-    uint32_t expected_crc;
-
-    expected_crc = *(uint32_t *)(FAILSAFE_SECTOR_ADDR + FAILSAFE_EXPECTED_CRC_OFFSET);
-    FailSafeWrite(FAILSAFE_SECTOR_ADDR, expected_crc, 0U);
-}
-
 /* End of a successful OTA, before BankSwap: store the expected CRC of the
- * freshly programmed inactive-bank APP and reset its failure counter.
+ * freshly programmed inactive-bank APP and bump its version number.
  */
 void bootloader_RecordAppCrc(uint32_t expected_crc)
 {
-    FailSafeWrite(INACTIVE_BANK_START + FAILSAFE_SECTOR_ADDR, expected_crc, 0U);
+    uint32_t old_version = *(uint32_t *)(FAILSAFE_SECTOR_ADDR + FAILSAFE_APP_VERSION_OFFSET);
+    uint32_t new_version;
+
+    if (old_version == 0xFFFFFFFFU)
+    {
+        old_version = 0U;
+    }
+    new_version = old_version + 1U;
+
+    FailSafeWrite(INACTIVE_BANK_START + FAILSAFE_SECTOR_ADDR, expected_crc, new_version);
 }
 
-/* Read the current boot failure counter (0xFFFFFFFF = treated as 0). */
-uint32_t bootloader_FailureCountGet(void)
+/* Read the current APP version number (0xFFFFFFFF = treated as 0). */
+uint32_t bootloader_AppVersionGet(void)
 {
-    uint32_t count = *(uint32_t *)(FAILSAFE_SECTOR_ADDR + FAILSAFE_FAIL_COUNT_OFFSET);
-    if (count == 0xFFFFFFFFU)
+    uint32_t version = *(uint32_t *)(FAILSAFE_SECTOR_ADDR + FAILSAFE_APP_VERSION_OFFSET);
+    if (version == 0xFFFFFFFFU)
     {
-        count = 0U;
+        version = 0U;
     }
-    return count;
+    return version;
 }

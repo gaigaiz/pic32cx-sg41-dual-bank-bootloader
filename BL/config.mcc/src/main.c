@@ -72,6 +72,31 @@ int main ( void )
         SERCOM4_REGS->USART_INT.SERCOM_DATA = msg[i];
     }
 
+    /* 打印当前 APP 版本号 */
+    {
+        uint32_t ver = bootloader_AppVersionGet();
+        char vbuf[16];
+        int vlen = 0;
+        vbuf[vlen++] = 'A';
+        vbuf[vlen++] = 'P';
+        vbuf[vlen++] = 'P';
+        vbuf[vlen++] = ' ';
+        vbuf[vlen++] = 'V';
+        if (ver >= 10U) {
+            vbuf[vlen++] = (char)('0' + (ver / 10U));
+        }
+        vbuf[vlen++] = (char)('0' + (ver % 10U));
+        vbuf[vlen++] = '.';
+        vbuf[vlen++] = '0';
+        vbuf[vlen++] = '\r';
+        vbuf[vlen++] = '\n';
+        vbuf[vlen] = '\0';
+        for (int i = 0; vbuf[i] != '\0'; i++) {
+            while (!(SERCOM4_REGS->USART_INT.SERCOM_INTFLAG & SERCOM_USART_INT_INTFLAG_DRE_Msk));
+            SERCOM4_REGS->USART_INT.SERCOM_DATA = vbuf[i];
+        }
+    }
+
     while (true)
     {
         bootloader_UART_Tasks();

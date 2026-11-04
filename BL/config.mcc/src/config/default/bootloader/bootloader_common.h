@@ -77,15 +77,14 @@
 /* Fail-safe state sector, mapped at the top of the active bank's APP area.
  * Layout (one 8KB erase block, 0x7E000..0x7FFFF):
  *   +0x00 : expected CRC of the APP region (0xFFFFFFFF = not recorded)
- *   +0x04 : boot failure counter (0xFFFFFFFF = treated as 0)
+ *   +0x04 : APP version number (0xFFFFFFFF = treated as 0, printed as V0.0)
  *   rest  : 0xFF padding
  * The inactive bank's copy sits at INACTIVE_BANK_START + FAILSAFE_SECTOR_ADDR.
  */
 #define FAILSAFE_SECTOR_ADDR                    (0x7E000UL)
 #define FAILSAFE_EXPECTED_CRC_OFFSET            (0x00U)
-#define FAILSAFE_FAIL_COUNT_OFFSET              (0x04U)
+#define FAILSAFE_APP_VERSION_OFFSET             (0x04U)
 #define APP_REGION_SIZE                         (FAILSAFE_SECTOR_ADDR - APP_START_ADDRESS)
-#define BOOT_FAIL_THRESHOLD                     (3U)
 
 
 #define BTL_TRIGGER_RAM_START                   0x20000000
@@ -323,17 +322,15 @@ void bootloader_TriggerReset(void);
 
 /* Fail-safe boot checks.
  * bootloader_BootCheck() returns true only if the APP region CRC matches the
- * recorded value (or no value has been recorded yet) and the failure counter
- * is below the threshold; it also increments the counter on a successful jump.
- * bootloader_FailureCountClear() resets the counter when the APP actively
- * jumps back to the bootloader (proving it ran).
+ * recorded value (or no value has been recorded yet).
  * bootloader_RecordAppCrc() stores the expected CRC of the freshly programmed
- * inactive-bank APP at the end of an OTA, before BankSwap.
+ * inactive-bank APP at the end of an OTA, before BankSwap, and bumps the
+ * recorded APP version number.
+ * bootloader_AppVersionGet() reads the current APP version number for printing.
  */
 bool bootloader_BootCheck(void);
-void bootloader_FailureCountClear(void);
 void bootloader_RecordAppCrc(uint32_t expected_crc);
-uint32_t bootloader_FailureCountGet(void);
+uint32_t bootloader_AppVersionGet(void);
 
 
 #endif      //BOOTLOADER_COMMON_H
