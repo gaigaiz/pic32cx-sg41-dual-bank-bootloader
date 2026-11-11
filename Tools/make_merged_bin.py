@@ -25,9 +25,11 @@ ERASE_BLOCK = 0x2000      # 8192 byte NVMCTRL erase block
 CONFIG_BASE = 0x800000    # config-bit region (0x804000...) excluded from image
 FLASH_END = 0x100000
 
-HEX_BL = r"C:\Users\21891\Desktop\bootloder\BL\out\BL\default.hex"
-HEX_APP = r"C:\Users\21891\Desktop\bootloder\APP\out\APP\default.hex"
-OUT_DIR = r"C:\Users\21891\Desktop\bootloder\BL\out\BL"
+# Repository root = parent of the Tools/ folder holding this script.
+ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+HEX_BL = os.path.join(ROOT_DIR, "BL", "out", "BL", "default.hex")
+HEX_APP = os.path.join(ROOT_DIR, "APP", "out", "APP", "default.hex")
+OUT_DIR = os.path.join(ROOT_DIR, "BL", "out", "BL")
 OUT_BL_BIN = os.path.join(OUT_DIR, "bl.bin")
 OUT_APP_BIN = os.path.join(OUT_DIR, "app.bin")
 OUT_MERGED = os.path.join(OUT_DIR, "merged_bl_app.bin")

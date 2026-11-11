@@ -243,7 +243,7 @@ int main ( void )
     /* Let the APP settle for ~2.5s before marking start success.
      * If the app crashes before this point, WDT will reset and BL counts it.
      */
-    App_DelayMs(2500U);
+    // App_DelayMs(1000U);
 
     /* Write success marker: clear retry_cnt and bankswapped in the state sector. */
     App_FailSafeMarkStarted();

@@ -14,3 +14,17 @@ __pycache__/
 # 临时文件
 *.tmp
 *.bak
+
+# 工具脚本生成的二进制镜像（由 HEX 重新生成，不入库）
+Tools/*.bin
+
+# 早期遗留单槽旧工程，与当前双 Bank 工程无关
+pic32cx_sg41_cult.X/
+
+# MCC / MPLAB 本地生成目录与私有配置
+.generated_files/
+**/.generated/
+nbproject/private/
+
+# DFP 设备支持包头文件（由 MPLAB 工具链安装，不随仓库分发）
+**/src/packs/

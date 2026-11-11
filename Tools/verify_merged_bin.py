@@ -3,9 +3,11 @@
 import os
 import struct
 
-OUT_DIR = r"C:\Users\21891\Desktop\bootloder\BL\out\BL"
-HEX_BL = r"C:\Users\21891\Desktop\bootloder\BL\out\BL\default.hex"
-HEX_APP = r"C:\Users\21891\Desktop\bootloder\APP\out\APP\default.hex"
+# Repository root = parent of the Tools/ folder holding this script.
+ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+OUT_DIR = os.path.join(ROOT_DIR, "BL", "out", "BL")
+HEX_BL = os.path.join(ROOT_DIR, "BL", "out", "BL", "default.hex")
+HEX_APP = os.path.join(ROOT_DIR, "APP", "out", "APP", "default.hex")
 BL_SIZE = 0x2000
 APP_OFFSET = 0x2000
 BANK_SIZE = 0x80000

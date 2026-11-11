@@ -1892,6 +1892,311 @@ data:
           type: User
         type: Values
       type: Boolean
+    USB_OTHER_INTERRUPT_ENABLE_UPDATE:
+      attributes:
+        id: USB_OTHER_INTERRUPT_ENABLE_UPDATE
+        label: NVIC Peripheral Enable/Disable Update
+      children:
+      - children:
+        - attributes:
+            id: core
+            value: 'true'
+          type: Dynamic
+        type: Values
+      type: Boolean
+    NVIC_80_0_ENABLE:
+      attributes:
+        id: NVIC_80_0_ENABLE
+        label: Enable Universal Serial Bus Interrupt
+      children:
+      - children:
+        - attributes:
+            id: core
+            value: 'false'
+          type: Dynamic
+        type: Values
+      type: Boolean
+    USB_OTHER_INTERRUPT_ENABLE:
+      attributes:
+        id: USB_OTHER_INTERRUPT_ENABLE
+        label: Vector Peripheral Enable
+      type: Boolean
+    NVIC_80_0_HANDLER_LOCK:
+      attributes:
+        id: NVIC_80_0_HANDLER_LOCK
+        label: Handler Lock
+      children:
+      - children:
+        - attributes:
+            id: core
+            value: 'false'
+          type: Dynamic
+        type: Values
+      type: Boolean
+    USB_OTHER_INTERRUPT_HANDLER_LOCK:
+      attributes:
+        id: USB_OTHER_INTERRUPT_HANDLER_LOCK
+        label: Vector Peripheral Handler Lock
+      type: Boolean
+    NVIC_80_0_HANDLER:
+      attributes:
+        id: NVIC_80_0_HANDLER
+        label: Handler
+      children:
+      - children:
+        - attributes:
+            id: core
+            value: USB_OTHER_Handler
+          type: Dynamic
+        type: Values
+      type: String
+    USB_OTHER_INTERRUPT_HANDLER:
+      attributes:
+        id: USB_OTHER_INTERRUPT_HANDLER
+        label: Vector Peripheral Handler
+      type: String
+    USB_SOF_HSOF_INTERRUPT_ENABLE_UPDATE:
+      attributes:
+        id: USB_SOF_HSOF_INTERRUPT_ENABLE_UPDATE
+        label: NVIC Peripheral Enable/Disable Update
+      children:
+      - children:
+        - attributes:
+            id: core
+            value: 'true'
+          type: Dynamic
+        type: Values
+      type: Boolean
+    NVIC_81_0_ENABLE:
+      attributes:
+        id: NVIC_81_0_ENABLE
+        label: Enable USB Start of Frame Interrupt
+      children:
+      - children:
+        - attributes:
+            id: core
+            value: 'false'
+          type: Dynamic
+        type: Values
+      type: Boolean
+    USB_SOF_HSOF_INTERRUPT_ENABLE:
+      attributes:
+        id: USB_SOF_HSOF_INTERRUPT_ENABLE
+        label: Vector Peripheral Enable
+      type: Boolean
+    NVIC_81_0_HANDLER_LOCK:
+      attributes:
+        id: NVIC_81_0_HANDLER_LOCK
+        label: Handler Lock
+      children:
+      - children:
+        - attributes:
+            id: core
+            value: 'false'
+          type: Dynamic
+        type: Values
+      type: Boolean
+    USB_SOF_HSOF_INTERRUPT_HANDLER_LOCK:
+      attributes:
+        id: USB_SOF_HSOF_INTERRUPT_HANDLER_LOCK
+        label: Vector Peripheral Handler Lock
+      type: Boolean
+    NVIC_81_0_HANDLER:
+      attributes:
+        id: NVIC_81_0_HANDLER
+        label: Handler
+      children:
+      - children:
+        - attributes:
+            id: core
+            value: USB_SOF_HSOF_Handler
+          type: Dynamic
+        type: Values
+      type: String
+    USB_SOF_HSOF_INTERRUPT_HANDLER:
+      attributes:
+        id: USB_SOF_HSOF_INTERRUPT_HANDLER
+        label: Vector Peripheral Handler
+      type: String
+    USB_TRCPT0_INTERRUPT_ENABLE_UPDATE:
+      attributes:
+        id: USB_TRCPT0_INTERRUPT_ENABLE_UPDATE
+        label: NVIC Peripheral Enable/Disable Update
+      children:
+      - children:
+        - attributes:
+            id: core
+            value: 'true'
+          type: Dynamic
+        type: Values
+      type: Boolean
+    NVIC_82_0_ENABLE:
+      attributes:
+        id: NVIC_82_0_ENABLE
+        label: Enable USB Transfer Complete 0 Interrupt
+      children:
+      - children:
+        - attributes:
+            id: core
+            value: 'false'
+          type: Dynamic
+        type: Values
+      type: Boolean
+    USB_TRCPT0_INTERRUPT_ENABLE:
+      attributes:
+        id: USB_TRCPT0_INTERRUPT_ENABLE
+        label: Vector Peripheral Enable
+      type: Boolean
+    NVIC_82_0_HANDLER_LOCK:
+      attributes:
+        id: NVIC_82_0_HANDLER_LOCK
+        label: Handler Lock
+      children:
+      - children:
+        - attributes:
+            id: core
+            value: 'false'
+          type: Dynamic
+        type: Values
+      type: Boolean
+    USB_TRCPT0_INTERRUPT_HANDLER_LOCK:
+      attributes:
+        id: USB_TRCPT0_INTERRUPT_HANDLER_LOCK
+        label: Vector Peripheral Handler Lock
+      type: Boolean
+    NVIC_82_0_HANDLER:
+      attributes:
+        id: NVIC_82_0_HANDLER
+        label: Handler
+      children:
+      - children:
+        - attributes:
+            id: core
+            value: USB_TRCPT0_Handler
+          type: Dynamic
+        type: Values
+      type: String
+    USB_TRCPT0_INTERRUPT_HANDLER:
+      attributes:
+        id: USB_TRCPT0_INTERRUPT_HANDLER
+        label: Vector Peripheral Handler
+      type: String
+    USB_TRCPT1_INTERRUPT_ENABLE_UPDATE:
+      attributes:
+        id: USB_TRCPT1_INTERRUPT_ENABLE_UPDATE
+        label: NVIC Peripheral Enable/Disable Update
+      children:
+      - children:
+        - attributes:
+            id: core
+            value: 'true'
+          type: Dynamic
+        type: Values
+      type: Boolean
+    NVIC_83_0_ENABLE:
+      attributes:
+        id: NVIC_83_0_ENABLE
+        label: Enable USB Transfer Complete 1 Interrupt
+      children:
+      - children:
+        - attributes:
+            id: core
+            value: 'false'
+          type: Dynamic
+        type: Values
+      type: Boolean
+    USB_TRCPT1_INTERRUPT_ENABLE:
+      attributes:
+        id: USB_TRCPT1_INTERRUPT_ENABLE
+        label: Vector Peripheral Enable
+      type: Boolean
+    NVIC_83_0_HANDLER_LOCK:
+      attributes:
+        id: NVIC_83_0_HANDLER_LOCK
+        label: Handler Lock
+      children:
+      - children:
+        - attributes:
+            id: core
+            value: 'false'
+          type: Dynamic
+        type: Values
+      type: Boolean
+    USB_TRCPT1_INTERRUPT_HANDLER_LOCK:
+      attributes:
+        id: USB_TRCPT1_INTERRUPT_HANDLER_LOCK
+        label: Vector Peripheral Handler Lock
+      type: Boolean
+    NVIC_83_0_HANDLER:
+      attributes:
+        id: NVIC_83_0_HANDLER
+        label: Handler
+      children:
+      - children:
+        - attributes:
+            id: core
+            value: USB_TRCPT1_Handler
+          type: Dynamic
+        type: Values
+      type: String
+    USB_TRCPT1_INTERRUPT_HANDLER:
+      attributes:
+        id: USB_TRCPT1_INTERRUPT_HANDLER
+        label: Vector Peripheral Handler
+      type: String
+    MCLK_APBB_INITIAL_VALUE:
+      attributes:
+        id: MCLK_APBB_INITIAL_VALUE
+        label: MCLK_APBB_INITIAL_VALUE
+      children:
+      - children:
+        - attributes:
+            id: core
+            value: '0x18056'
+          type: Dynamic
+        type: Values
+      type: String
+    GCLK_ID_10_CHEN:
+      attributes:
+        id: GCLK_ID_10_CHEN
+        label: Peripheral Channel 10 Clock Enable
+      children:
+      - children:
+        - attributes:
+            id: core
+            value: 'false'
+          type: Dynamic
+        type: Values
+      type: Boolean
+    USB_CLOCK_FREQUENCY:
+      attributes:
+        id: USB_CLOCK_FREQUENCY
+        label: USB Clock Frequency
+      children:
+      - children:
+        - attributes:
+            id: core
+            value: '0'
+          type: Dynamic
+        type: Values
+      type: Integer
+    USB_CLOCK_ENABLE:
+      attributes:
+        id: USB_CLOCK_ENABLE
+        label: USB Clock Enable
+      type: Boolean
+    systickEnable:
+      attributes:
+        id: systickEnable
+        label: Enable SysTick
+      children:
+      - children:
+        - attributes:
+            id: core
+            value: 'false'
+          type: Dynamic
+        type: Values
+      type: Boolean
   userData:
     children:
     - attributes:
