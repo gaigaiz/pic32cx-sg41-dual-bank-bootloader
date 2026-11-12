@@ -1,3 +1,5 @@
+[English](README.md) | [中文](README.zh-CN.md)
+
 # PIC32CX-SG41 Dual-Bank Fail-Safe Bootloader
 
 A UART bootloader with hardware dual-bank (A/B) OTA, APP CRC verification,
