@@ -28,3 +28,6 @@ nbproject/private/
 
 # DFP 设备支持包头文件（由 MPLAB 工具链安装，不随仓库分发）
 **/src/packs/
+
+# 个人敏感备份码 / 账号凭据，禁止入库
+docs/Backup-codes-max.lin.txt

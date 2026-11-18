@@ -76,7 +76,7 @@ extern "C" {
 #define DEVICE_SERIES        "PIC32CXSG41"
 
 /* CPU clock frequency */
-#define CPU_CLOCK_FREQUENCY 48000000U
+#define CPU_CLOCK_FREQUENCY 12000000U
 
 // *****************************************************************************
 // *****************************************************************************

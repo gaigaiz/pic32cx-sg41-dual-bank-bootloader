@@ -1,6 +1,6 @@
 configVersion: 1.0.0
 componentName: sercom4
-coreVersion: 5.9.1
+coreVersion: 5.9.2
 device: PIC32CX1025SG41128
 library: []
 dependency:
@@ -30,7 +30,7 @@ data:
       - children:
         - attributes:
             id: sercom4
-            value: '232'
+            value: '54'
           type: Dynamic
         type: Values
       type: Hex
@@ -109,7 +109,7 @@ data:
             id: max
           children:
           - type: Value
-            value: '5125'
+            value: '20500'
           type: Integer
         type: Attributes
       type: Integer
@@ -385,7 +385,7 @@ data:
       - children:
         - attributes:
             id: sercom4
-            value: '23'
+            value: '5'
           type: Dynamic
         type: Values
       type: Integer
@@ -557,7 +557,7 @@ data:
       - children:
         - attributes:
             id: sercom4
-            value: '63019'
+            value: '55469'
           type: Dynamic
         type: Values
       type: Integer

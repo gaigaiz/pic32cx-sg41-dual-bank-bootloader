@@ -61,8 +61,8 @@
 // Section: Global Data
 // *****************************************************************************
 // *****************************************************************************
-/* SERCOM4 USART baud value for 115200 Hz baud rate */
-#define SERCOM4_USART_INT_BAUD_VALUE            (63019UL)
+/* SERCOM4 USART baud value for 115200 Hz baud rate, clocked from XOSC1 12MHz (16x sample) */
+#define SERCOM4_USART_INT_BAUD_VALUE            (55469UL)
 
 static volatile SERCOM_USART_OBJECT sercom4USARTObj;
 
@@ -157,7 +157,7 @@ void SERCOM4_USART_Initialize( void )
 
 uint32_t SERCOM4_USART_FrequencyGet( void )
 {
-    return 48000000UL;
+    return 12000000UL;
 }
 
 bool SERCOM4_USART_SerialSetup( USART_SERIAL_SETUP * serialSetup, uint32_t clkFrequency )

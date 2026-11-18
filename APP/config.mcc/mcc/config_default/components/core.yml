@@ -1,6 +1,6 @@
 configVersion: 1.0.0
 componentName: core
-coreVersion: 5.9.1
+coreVersion: 5.9.2
 device: PIC32CX1025SG41128
 library: []
 dependency:
@@ -89,7 +89,7 @@ data:
       - children:
         - attributes:
             id: core
-            value: '48000000'
+            value: '12000000'
           type: Dynamic
         type: Values
       type: Integer
@@ -113,7 +113,7 @@ data:
       - children:
         - attributes:
             id: core
-            value: '48000000'
+            value: '12000000'
           type: Dynamic
         type: Values
       type: Integer
@@ -128,7 +128,7 @@ data:
             value: '7'
           type: Dynamic
         - attributes:
-            value: '6'
+            value: '1'
           type: User
         type: Values
       type: KeyValueSet
@@ -140,7 +140,7 @@ data:
       - children:
         - attributes:
             id: core
-            value: '0'
+            value: '12000000'
           type: Dynamic
         type: Values
       type: Integer
@@ -253,7 +253,7 @@ data:
       - children:
         - attributes:
             id: core
-            value: '48000000'
+            value: '12000000'
           type: Dynamic
         type: Values
       type: Integer
@@ -264,7 +264,7 @@ data:
       children:
       - children:
         - attributes:
-            value: '0'
+            value: '1'
           type: User
         type: Values
       type: KeyValueSet
@@ -279,7 +279,7 @@ data:
             value: 'true'
           type: Dynamic
         - attributes:
-            value: 'false'
+            value: 'true'
           type: User
         type: Values
       type: Boolean
@@ -291,7 +291,7 @@ data:
       - children:
         - attributes:
             id: core
-            value: '48000000'
+            value: '12000000'
           type: Dynamic
         type: Values
       type: Integer
@@ -1268,7 +1268,7 @@ data:
       - children:
         - attributes:
             id: core
-            value: '48000000'
+            value: '12000000'
           type: Dynamic
         type: Values
       type: Integer
@@ -1376,7 +1376,7 @@ data:
       - children:
         - attributes:
             id: core
-            value: '0xBB80'
+            value: '0x2EE0'
           type: Dynamic
         type: Values
       type: String
@@ -1390,7 +1390,7 @@ data:
             id: max
           children:
           - type: Value
-            value: '349.5253'
+            value: '1398.1012'
           type: Float
         type: Attributes
       type: Float
@@ -2197,6 +2197,140 @@ data:
           type: Dynamic
         type: Values
       type: Boolean
+    XOSC0_FREQ:
+      attributes:
+        id: XOSC0_FREQ
+        label: XOSC0 Clock Frequency
+      children:
+      - children:
+        - attributes:
+            id: core
+            value: '8000000'
+          type: Dynamic
+        type: Values
+      type: Integer
+    CONFIG_CLOCK_XOSC0_ENABLE:
+      attributes:
+        id: CONFIG_CLOCK_XOSC0_ENABLE
+        label: External Multipurpose Crystal Oscillator(XOSC) Enable
+      children:
+      - children:
+        - attributes:
+            value: 'true'
+          type: User
+        type: Values
+      type: Boolean
+    XOSC1_FREQ:
+      attributes:
+        id: XOSC1_FREQ
+        label: XOSC1 Clock Frequency
+      children:
+      - children:
+        - attributes:
+            id: core
+            value: '12000000'
+          type: Dynamic
+        type: Values
+      type: Integer
+    CONFIG_CLOCK_XOSC1_ENABLE:
+      attributes:
+        id: CONFIG_CLOCK_XOSC1_ENABLE
+        label: External Multipurpose Crystal Oscillator(XOSC) Enable
+      children:
+      - children:
+        - attributes:
+            value: 'true'
+          type: User
+        type: Values
+      type: Boolean
+    XOSC1_IMULT:
+      attributes:
+        id: XOSC1_IMULT
+        label: Oscillator Current Multiplier
+      children:
+      - children:
+        - attributes:
+            id: core
+            value: '4'
+          type: Dynamic
+        type: Values
+      type: Integer
+    XOSC1_IPTAT:
+      attributes:
+        id: XOSC1_IPTAT
+        label: Oscillator Current Reference
+      children:
+      - children:
+        - attributes:
+            id: core
+            value: '3'
+          type: Dynamic
+        type: Values
+      type: Integer
+    CONFIG_CLOCK_XOSC1_FREQUENCY:
+      attributes:
+        id: CONFIG_CLOCK_XOSC1_FREQUENCY
+        label: Frequency
+      children:
+      - children:
+        - attributes:
+            value: '12000000'
+          type: User
+        type: Values
+      type: Integer
+    CONFIG_CLOCK_XOSC1_CFDEN:
+      attributes:
+        id: CONFIG_CLOCK_XOSC1_CFDEN
+        label: Enable Clock Failure Detection
+      children:
+      - children:
+        - attributes:
+            value: 'false'
+          type: User
+        type: Values
+      type: Boolean
+    GCLK_1_SRC:
+      attributes:
+        id: GCLK_1_SRC
+        label: Source Selection
+      children:
+      - children:
+        - attributes:
+            id: core
+            value: '6'
+          type: Dynamic
+        - attributes:
+            value: '1'
+          type: User
+        type: Values
+      type: KeyValueSet
+    GCLK_1_DIVIDER_VALUE:
+      attributes:
+        id: GCLK_1_DIVIDER_VALUE
+        label: GCLK_1_DIVIDER_VALUE
+      children:
+      - children:
+        - attributes:
+            id: core
+            value: '1'
+          type: Dynamic
+        type: Values
+      type: Integer
+    GCLK_1_DIV:
+      attributes:
+        id: GCLK_1_DIV
+        label: Division Factor
+      children:
+      - children:
+        - attributes:
+            id: core
+            value: '2'
+          type: Dynamic
+        - attributes:
+            value: '1'
+          type: User
+        type: Values
+      type: Integer
   userData:
     children:
     - attributes:

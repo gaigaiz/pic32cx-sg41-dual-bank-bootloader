@@ -115,7 +115,7 @@ data:
       - children:
         - attributes:
             id: core
-            value: '48000000'
+            value: '12000000'
           type: Dynamic
         type: Values
       type: Integer
@@ -298,7 +298,7 @@ data:
       - children:
         - attributes:
             id: core
-            value: '48000000'
+            value: '12000000'
           type: Dynamic
         type: Values
       type: Integer
@@ -313,7 +313,7 @@ data:
             value: '7'
           type: Dynamic
         - attributes:
-            value: '6'
+            value: '1'
           type: User
         type: Values
       type: KeyValueSet
@@ -582,7 +582,7 @@ data:
       - children:
         - attributes:
             id: core
-            value: '48000000'
+            value: '12000000'
           type: Dynamic
         type: Values
       type: Integer
@@ -1798,7 +1798,7 @@ data:
       - children:
         - attributes:
             id: core
-            value: '0x493E00'
+            value: '0x124F80'
           type: Dynamic
         type: Values
       type: String
@@ -1812,7 +1812,7 @@ data:
             id: max
           children:
           - type: Value
-            value: '349.5253'
+            value: '1398.1012'
           type: Float
         type: Attributes
       - children:
@@ -1929,7 +1929,7 @@ data:
       - children:
         - attributes:
             id: core
-            value: '8000000'
+            value: '12000000'
           type: Dynamic
         type: Values
       type: Integer
@@ -2386,6 +2386,41 @@ data:
           type: User
         type: Values
       type: Boolean
+    XOSC0_IMULT:
+      attributes:
+        id: XOSC0_IMULT
+        label: Oscillator Current Multiplier
+      children:
+      - children:
+        - attributes:
+            id: core
+            value: '4'
+          type: Dynamic
+        type: Values
+      type: Integer
+    XOSC0_IPTAT:
+      attributes:
+        id: XOSC0_IPTAT
+        label: Oscillator Current Reference
+      children:
+      - children:
+        - attributes:
+            id: core
+            value: '3'
+          type: Dynamic
+        type: Values
+      type: Integer
+    CONFIG_CLOCK_XOSC0_FREQUENCY:
+      attributes:
+        id: CONFIG_CLOCK_XOSC0_FREQUENCY
+        label: Frequency
+      children:
+      - children:
+        - attributes:
+            value: '12000000'
+          type: User
+        type: Values
+      type: Integer
   userData:
     children:
     - attributes:

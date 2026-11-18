@@ -44,7 +44,7 @@
                 "linker.preprocessor-macros": [
                     "RAM_LENGTH=0x3fff0",
                     "RAM_ORIGIN=0x20000010",
-                    "ROM_LENGTH=0x7c000",
+                    "ROM_LENGTH=0xfe000",
                     "ROM_ORIGIN=0x2000"
                 ],
                 "linker.heap-size": "512",
@@ -101,7 +101,8 @@
                 "config.mcc/src/config/default/startup_xc32.c",
                 "config.mcc/src/config/default/libc_syscalls.c",
                 "config.mcc/src/config/default/peripheral/sercom/usart/plib_sercom4_usart.c",
-                "config.mcc/src/config/default/peripheral/wdt/plib_wdt.c"
+                "config.mcc/src/config/default/peripheral/wdt/plib_wdt.c",
+                "config.mcc/src/config/default/system/cache/sys_cache.c"
             ]
         }
     ]

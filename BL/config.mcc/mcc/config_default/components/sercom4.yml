@@ -166,7 +166,7 @@ data:
             id: max
           children:
           - type: Value
-            value: '5125'
+            value: '20500'
           type: Integer
         type: Attributes
       type: Integer

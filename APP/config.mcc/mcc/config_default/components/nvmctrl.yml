@@ -1,6 +1,6 @@
 configVersion: 1.0.0
 componentName: nvmctrl
-coreVersion: 5.9.1
+coreVersion: 5.9.2
 device: PIC32CX1025SG41128
 library: []
 dependency:
@@ -25,7 +25,7 @@ data:
       - children:
         - attributes:
             id: nvmctrl
-            value: '1'
+            value: '0'
           type: Dynamic
         type: Values
       type: Integer

@@ -70,7 +70,7 @@ data:
       - children:
         - attributes:
             id: nvmctrl
-            value: '1'
+            value: '0'
           type: Dynamic
         type: Values
       type: Integer

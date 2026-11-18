@@ -56,6 +56,7 @@
 #include "peripheral/wdt/plib_wdt.h"
 #include "peripheral/cmcc/plib_cmcc.h"
 #include "peripheral/sercom/usart/plib_sercom4_usart.h"
+#include "system/cache/sys_cache.h"
 
 // DOM-IGNORE-BEGIN
 #ifdef __cplusplus  // Provide C++ Compatibility
@@ -72,7 +73,7 @@ extern "C" {
 #define DEVICE_SERIES        "PIC32CXSG41"
 
 /* CPU clock frequency */
-#define CPU_CLOCK_FREQUENCY 48000000U
+#define CPU_CLOCK_FREQUENCY 12000000U
 
 // *****************************************************************************
 // *****************************************************************************
