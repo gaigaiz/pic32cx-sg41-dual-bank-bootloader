@@ -43,7 +43,23 @@
 
 static void OSCCTRL_Initialize(void)
 {
+    /****************** XOSC0 Initialization   ********************************/
 
+    /* Configure External Oscillator */
+    OSCCTRL_REGS->OSCCTRL_XOSCCTRL[0] = OSCCTRL_XOSCCTRL_STARTUP(0U) | OSCCTRL_XOSCCTRL_IMULT(3U) | OSCCTRL_XOSCCTRL_IPTAT(2U) | OSCCTRL_XOSCCTRL_XTALEN_Msk | OSCCTRL_XOSCCTRL_ENABLE_Msk;
+    while((OSCCTRL_REGS->OSCCTRL_STATUS & OSCCTRL_STATUS_XOSCRDY0_Msk) != OSCCTRL_STATUS_XOSCRDY0_Msk)
+    {
+        /* Waiting for the XOSC Ready state */
+    }
+
+    /****************** XOSC1 Initialization   ********************************/
+
+    /* Configure External Oscillator */
+    OSCCTRL_REGS->OSCCTRL_XOSCCTRL[1] = OSCCTRL_XOSCCTRL_STARTUP(0U) | OSCCTRL_XOSCCTRL_IMULT(4U) | OSCCTRL_XOSCCTRL_IPTAT(3U) | OSCCTRL_XOSCCTRL_XTALEN_Msk | OSCCTRL_XOSCCTRL_ENABLE_Msk;
+    while((OSCCTRL_REGS->OSCCTRL_STATUS & OSCCTRL_STATUS_XOSCRDY1_Msk) != OSCCTRL_STATUS_XOSCRDY1_Msk)
+    {
+        /* Waiting for the XOSC Ready state */
+    }
 }
 
 static void OSC32KCTRL_Initialize(void)
@@ -77,6 +93,16 @@ static void GCLK0_Initialize(void)
     }
 }
 
+static void GCLK1_Initialize(void)
+{
+    GCLK_REGS->GCLK_GENCTRL[1] = GCLK_GENCTRL_DIV(1U) | GCLK_GENCTRL_SRC(1U) | GCLK_GENCTRL_GENEN_Msk;
+
+    while((GCLK_REGS->GCLK_SYNCBUSY & GCLK_SYNCBUSY_GENCTRL_GCLK1) == GCLK_SYNCBUSY_GENCTRL_GCLK1)
+    {
+        /* wait for the Generator 1 synchronization */
+    }
+}
+
 static void GCLK2_Initialize(void)
 {
     GCLK_REGS->GCLK_GENCTRL[2] = GCLK_GENCTRL_DIV(1U) | GCLK_GENCTRL_SRC(4U) | GCLK_GENCTRL_GENEN_Msk;
@@ -99,13 +125,14 @@ void CLOCK_Initialize (void)
     OSC32KCTRL_Initialize();
 
     DFLL_Initialize();
+    GCLK1_Initialize();
     GCLK2_Initialize();
     GCLK0_Initialize();
 
     /* MISRAC 2023 deviation block end */
 
     /* Selection of the Generator and write Lock for SERCOM4_CORE */
-    GCLK_REGS->GCLK_PCHCTRL[34] = GCLK_PCHCTRL_GEN(0x0U)  | GCLK_PCHCTRL_CHEN_Msk;
+    GCLK_REGS->GCLK_PCHCTRL[34] = GCLK_PCHCTRL_GEN(0x1U)  | GCLK_PCHCTRL_CHEN_Msk;
 
     while ((GCLK_REGS->GCLK_PCHCTRL[34] & GCLK_PCHCTRL_CHEN_Msk) != GCLK_PCHCTRL_CHEN_Msk)
     {

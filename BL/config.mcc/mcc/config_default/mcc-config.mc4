@@ -1,6 +1,6 @@
 configVersion: 1.0.0
-coreVersion: 5.9.1
-spaHostVersion: 1.3.0
+coreVersion: 5.9.2
+spaHostVersion: 1.3.1
 device: PIC32CX1025SG41128
 deviceLibrary: {}
 groupModules: []
@@ -40,7 +40,7 @@ generatedFileHashHistoryMap:
 - file: ..\src\config\default\initialization.c
   hash: 56d984f8844c6e64927a7200fdf882239047145c5fe0a94adb7a167062e44e64
 - file: ..\src\config\default\peripheral\clock\plib_clock.c
-  hash: 05a0555c3ddd7e66322bdc680ff978a97a7d225a682845e57fb90f16fdf386fd
+  hash: 7b32d57bb5df62d38bd6cf1844aca71a9d908be1e4b6956f47155fdf32bf1d71
 - file: ..\src\config\default\peripheral\clock\plib_clock.h
   hash: 59322a99314cb17c6b595d51d18769582e61189140188aa053acfdc671487f21
 - file: ..\src\config\default\peripheral\cmcc\plib_cmcc.c
@@ -72,7 +72,7 @@ generatedFileHashHistoryMap:
 - file: ..\src\config\default\peripheral\port\plib_port.h
   hash: 34f5083025b0f658ce84948e843fdec5830314a795d685672ef96037a1f4fcfa
 - file: ..\src\config\default\peripheral\sercom\usart\plib_sercom4_usart.c
-  hash: cb37366de0d46f7a20adf0f0c4827742e3c6eb91d4193fcbc73067745306900f
+  hash: 6e891c25e83f892622d055f5c6d67cb556dac55b273044b903cbcae1eb7cbbef
 - file: ..\src\config\default\peripheral\sercom\usart\plib_sercom4_usart.h
   hash: 05e5d58beebde6ee9922e3dd2c192792e76a2ba5443969a6696fecbd5414fbf1
 - file: ..\src\config\default\peripheral\sercom\usart\plib_sercom_usart_common.h
