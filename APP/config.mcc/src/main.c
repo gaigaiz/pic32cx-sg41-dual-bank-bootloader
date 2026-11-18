@@ -76,10 +76,10 @@ static void App_FailSafeMarkStarted(void)
     }
 }
 
-/* Rough delay: ~2.5s at 48MHz using DWT cycle counter. */
+/* Rough delay: ~2.5s at 12MHz using DWT cycle counter. */
 static void App_DelayMs(uint32_t ms)
 {
-    uint32_t ticks = ms * 48000U;
+    uint32_t ticks = ms * 12000U;
     uint32_t start = DWT->CYCCNT;
     while ((DWT->CYCCNT - start) < ticks)
     {
