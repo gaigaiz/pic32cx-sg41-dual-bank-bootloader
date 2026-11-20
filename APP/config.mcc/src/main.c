@@ -397,6 +397,27 @@ static void QSPI_PrintBuf(const char *tag, const uint8_t *buf, uint32_t len)
     Uart_WriteStr("\r\n");
 }
 
+static void QSPI_PrintBool(const char *tag, bool ok)
+{
+    char line[48];
+
+    (void)snprintf(line, sizeof(line), "%s ret=%d\r\n", tag, ok ? 1 : 0);
+    Uart_WriteStr(line);
+}
+
+/* Read RDSR and dump the raw byte plus WEL/BUSY bits for bring-up. */
+static void QSPI_PrintStatus(const char *tag)
+{
+    uint8_t sr = QSPI_FlashReadStatus();
+    char line[48];
+
+    (void)snprintf(line, sizeof(line), "%s SR=%02X WEL=%d BUSY=%d\r\n",
+                   tag, sr,
+                   ((sr & QSPI_FLASH_SR_WEL) != 0U) ? 1 : 0,
+                   ((sr & QSPI_FLASH_SR_BUSY) != 0U) ? 1 : 0);
+    Uart_WriteStr(line);
+}
+
 static bool QSPI_FlashWriteEnable(void)
 {
     qspi_command_xfer_t xfer;
@@ -412,8 +433,11 @@ static bool QSPI_FlashWriteEnable(void)
 static bool QSPI_FlashSectorErase(uint32_t addr)
 {
     qspi_command_xfer_t xfer;
+    bool stepOk;
 
-    if (!QSPI_FlashWriteEnable())
+    stepOk = QSPI_FlashWriteEnable();
+    QSPI_PrintBool("  erase: WREN", stepOk);
+    if (!stepOk)
     {
         return false;
     }
@@ -423,12 +447,16 @@ static bool QSPI_FlashSectorErase(uint32_t addr)
     xfer.addr_en     = true;
     xfer.addr_len    = ADDRL_24_BIT;
 
-    if (!QSPI_CommandWrite(&xfer, addr))
+    stepOk = QSPI_CommandWrite(&xfer, addr);
+    QSPI_PrintBool("  erase: CMD ", stepOk);
+    if (!stepOk)
     {
         return false;
     }
 
-    return QSPI_FlashWaitReady();
+    stepOk = QSPI_FlashWaitReady();
+    QSPI_PrintBool("  erase: ready", stepOk);
+    return stepOk;
 }
 
 /* Program one page region. Caller keeps len <= 256 and does not cross a page
@@ -436,13 +464,17 @@ static bool QSPI_FlashSectorErase(uint32_t addr)
 static bool QSPI_FlashPageProgram(uint32_t addr, const uint8_t *data, uint32_t len)
 {
     qspi_memory_xfer_t xfer;
+    bool stepOk;
 
     if ((len == 0U) || (len > QSPI_FLASH_PAGE_SIZE))
     {
+        QSPI_PrintBool("  program: len", false);
         return false;
     }
 
-    if (!QSPI_FlashWriteEnable())
+    stepOk = QSPI_FlashWriteEnable();
+    QSPI_PrintBool("  program: WREN", stepOk);
+    if (!stepOk)
     {
         return false;
     }
@@ -456,12 +488,16 @@ static bool QSPI_FlashPageProgram(uint32_t addr, const uint8_t *data, uint32_t l
     xfer.continuous_read_en = false;
     xfer.dummy_cycles       = 0U;
 
-    if (!QSPI_MemoryWrite(&xfer, (uint32_t *)data, len, addr))
+    stepOk = QSPI_MemoryWrite(&xfer, (uint32_t *)data, len, addr);
+    QSPI_PrintBool("  program: MEMWR", stepOk);
+    if (!stepOk)
     {
         return false;
     }
 
-    return QSPI_FlashWaitReady();
+    stepOk = QSPI_FlashWaitReady();
+    QSPI_PrintBool("  program: ready", stepOk);
+    return stepOk;
 }
 
 static bool QSPI_FlashRead(uint32_t addr, uint8_t *buf, uint32_t len)
@@ -494,10 +530,15 @@ static void QSPI_FlashSelfTest(void)
     static uint32_t txBuf[QSPI_FLASH_PAGE_SIZE / 4U];
     static uint32_t rxBuf[QSPI_FLASH_PAGE_SIZE / 4U];
     uint32_t i;
-    char line[32];
-    uint8_t sr;
+    char line[48];
+    bool stepOk;
 
-    if (!QSPI_FlashReadJedecId(id))
+    Uart_WriteStr("== QSPI bring-up ==\r\n");
+    QSPI_PrintStatus("init ");
+
+    stepOk = QSPI_FlashReadJedecId(id);
+    QSPI_PrintBool("ID read", stepOk);
+    if (!stepOk)
     {
         Uart_WriteStr("QSPI: no response\r\n");
         return;
@@ -509,39 +550,49 @@ static void QSPI_FlashSelfTest(void)
 
     /* Write-enable link check: after WREN the WEL bit should latch to 1.
      * If WEL stays 0, the erase/program commands are ignored by the flash. */
-    (void)QSPI_FlashWriteEnable();
-    sr = QSPI_FlashReadStatus();
-    (void)snprintf(line, sizeof(line), "WREN SR: %02X  WEL=%d BUSY=%d\r\n",
-                   sr,
-                   ((sr & QSPI_FLASH_SR_WEL) != 0U) ? 1 : 0,
-                   ((sr & QSPI_FLASH_SR_BUSY) != 0U) ? 1 : 0);
-    Uart_WriteStr(line);
+    stepOk = QSPI_FlashWriteEnable();
+    QSPI_PrintBool("WREN test", stepOk);
+    QSPI_PrintStatus("wren ");
 
     for (i = 0U; i < 16U; i++)
     {
         ((uint8_t *)txBuf)[i] = (uint8_t)(0xA0U + i);
     }
 
+    /* Original sector content before any erase, to spot stale data. */
+    stepOk = QSPI_FlashRead(QSPI_FLASH_TEST_ADDR, (uint8_t *)rxBuf, 16U);
+    QSPI_PrintBool("read BEFORE", stepOk);
+    if (stepOk)
+    {
+        QSPI_PrintBuf("BEFORE  ", (const uint8_t *)rxBuf, 16U);
+    }
+
+    Uart_WriteStr("-- erase sector 0x000000 --\r\n");
     if (!QSPI_FlashSectorErase(QSPI_FLASH_TEST_ADDR))
     {
-        Uart_WriteStr("QSPI erase busy timeout\r\n");
+        Uart_WriteStr("QSPI erase failed\r\n");
         return;
     }
+    QSPI_PrintStatus("erase");
 
-    if (!QSPI_FlashRead(QSPI_FLASH_TEST_ADDR, (uint8_t *)rxBuf, 16U))
+    stepOk = QSPI_FlashRead(QSPI_FLASH_TEST_ADDR, (uint8_t *)rxBuf, 16U);
+    QSPI_PrintBool("read ERASED", stepOk);
+    if (stepOk)
     {
-        Uart_WriteStr("QSPI read fail after erase\r\n");
-        return;
+        QSPI_PrintBuf("ERASED  ", (const uint8_t *)rxBuf, 16U);
     }
-    QSPI_PrintBuf("ERASED  ", (const uint8_t *)rxBuf, 16U);
 
+    Uart_WriteStr("-- program 16 bytes @ 0x000000 --\r\n");
     if (!QSPI_FlashPageProgram(QSPI_FLASH_TEST_ADDR, (const uint8_t *)txBuf, 16U))
     {
-        Uart_WriteStr("QSPI program busy timeout\r\n");
+        Uart_WriteStr("QSPI program failed\r\n");
         return;
     }
+    QSPI_PrintStatus("program");
 
-    if (!QSPI_FlashRead(QSPI_FLASH_TEST_ADDR, (uint8_t *)rxBuf, 16U))
+    stepOk = QSPI_FlashRead(QSPI_FLASH_TEST_ADDR, (uint8_t *)rxBuf, 16U);
+    QSPI_PrintBool("read BACK", stepOk);
+    if (!stepOk)
     {
         Uart_WriteStr("QSPI read fail after program\r\n");
         return;
@@ -553,6 +604,12 @@ static void QSPI_FlashSelfTest(void)
     {
         if (((uint8_t *)rxBuf)[i] != ((uint8_t *)txBuf)[i])
         {
+            (void)snprintf(line, sizeof(line),
+                           "MISMATCH idx=%lu got=%02X exp=%02X\r\n",
+                           (unsigned long)i,
+                           ((uint8_t *)rxBuf)[i],
+                           ((uint8_t *)txBuf)[i]);
+            Uart_WriteStr(line);
             Uart_WriteStr("QSPI RW MISMATCH\r\n");
             return;
         }
