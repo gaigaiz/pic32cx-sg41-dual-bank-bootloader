@@ -314,6 +314,219 @@ static void MCP9804_ReportTemperature(void)
     Uart_WriteStr(line);
 }
 
+/* -------------------------------------------------------------------------- */
+/* QSPI serial flash: on-board SST26VF064BA (U700), 64 Mbit / 8 MiB, 24-bit  */
+/* address, 256-byte page. First pass runs single-bit SPI (1-1-1), no Quad.   */
+/* -------------------------------------------------------------------------- */
+#define QSPI_FLASH_PAGE_SIZE            256U
+#define QSPI_FLASH_SECTOR_SIZE          4096U
+#define QSPI_FLASH_TEST_ADDR            0x000000U
+
+#define QSPI_FLASH_CMD_JEDEC_ID         0x9FU
+#define QSPI_FLASH_CMD_RDSR             0x05U
+#define QSPI_FLASH_CMD_WREN             0x06U
+#define QSPI_FLASH_CMD_PP               0x02U
+#define QSPI_FLASH_CMD_SECTOR_ERASE     0x20U
+#define QSPI_FLASH_CMD_READ             0x03U
+
+#define QSPI_FLASH_SR_BUSY              0x01U
+#define QSPI_FLASH_SR_WEL               0x02U
+
+#define QSPI_BUSY_TIMEOUT               10000000UL
+
+static uint8_t QSPI_FlashReadStatus(void)
+{
+    qspi_register_xfer_t xfer;
+    uint32_t sr = 0U;
+
+    xfer.instruction   = QSPI_FLASH_CMD_RDSR;
+    xfer.width         = SINGLE_BIT_SPI;
+    xfer.dummy_cycles  = 0U;
+
+    (void)QSPI_RegisterRead(&xfer, &sr, 1U);
+    return (uint8_t)(sr & 0xFFU);
+}
+
+/* Poll BUSY until the flash finishes its internal erase/program. Feeds the
+ * WDT while waiting; returns false on timeout instead of hanging in BL. */
+static bool QSPI_FlashWaitReady(void)
+{
+    uint32_t timeout = QSPI_BUSY_TIMEOUT;
+
+    while ((QSPI_FlashReadStatus() & QSPI_FLASH_SR_BUSY) != 0U)
+    {
+        WDT_Clear();
+        if (timeout-- == 0U)
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
+static bool QSPI_FlashReadJedecId(uint8_t id[3])
+{
+    qspi_register_xfer_t xfer;
+    uint32_t idBuf = 0U;
+
+    xfer.instruction   = QSPI_FLASH_CMD_JEDEC_ID;
+    xfer.width         = SINGLE_BIT_SPI;
+    xfer.dummy_cycles  = 0U;
+
+    if (!QSPI_RegisterRead(&xfer, &idBuf, 3U))
+    {
+        return false;
+    }
+    id[0] = (uint8_t)(idBuf & 0xFFU);
+    id[1] = (uint8_t)((idBuf >> 8) & 0xFFU);
+    id[2] = (uint8_t)((idBuf >> 16) & 0xFFU);
+    return true;
+}
+
+static bool QSPI_FlashWriteEnable(void)
+{
+    qspi_command_xfer_t xfer;
+
+    xfer.instruction = QSPI_FLASH_CMD_WREN;
+    xfer.width       = SINGLE_BIT_SPI;
+    xfer.addr_en     = false;
+    xfer.addr_len    = ADDRL_24_BIT;
+
+    return QSPI_CommandWrite(&xfer, 0U);
+}
+
+static bool QSPI_FlashSectorErase(uint32_t addr)
+{
+    qspi_command_xfer_t xfer;
+
+    if (!QSPI_FlashWriteEnable())
+    {
+        return false;
+    }
+
+    xfer.instruction = QSPI_FLASH_CMD_SECTOR_ERASE;
+    xfer.width       = SINGLE_BIT_SPI;
+    xfer.addr_en     = true;
+    xfer.addr_len    = ADDRL_24_BIT;
+
+    if (!QSPI_CommandWrite(&xfer, addr))
+    {
+        return false;
+    }
+
+    return QSPI_FlashWaitReady();
+}
+
+/* Program one page region. Caller keeps len <= 256 and does not cross a page
+ * boundary. Buffer must be 32-bit aligned for the PLIB word copy. */
+static bool QSPI_FlashPageProgram(uint32_t addr, const uint8_t *data, uint32_t len)
+{
+    qspi_memory_xfer_t xfer;
+
+    if ((len == 0U) || (len > QSPI_FLASH_PAGE_SIZE))
+    {
+        return false;
+    }
+
+    if (!QSPI_FlashWriteEnable())
+    {
+        return false;
+    }
+
+    xfer.instruction        = QSPI_FLASH_CMD_PP;
+    xfer.option             = 0U;
+    xfer.width              = SINGLE_BIT_SPI;
+    xfer.addr_len           = ADDRL_24_BIT;
+    xfer.option_en          = false;
+    xfer.option_len         = OPTL_1_BIT;
+    xfer.continuous_read_en = false;
+    xfer.dummy_cycles       = 0U;
+
+    if (!QSPI_MemoryWrite(&xfer, (uint32_t *)data, len, addr))
+    {
+        return false;
+    }
+
+    return QSPI_FlashWaitReady();
+}
+
+static bool QSPI_FlashRead(uint32_t addr, uint8_t *buf, uint32_t len)
+{
+    qspi_memory_xfer_t xfer;
+
+    if (len == 0U)
+    {
+        return false;
+    }
+
+    xfer.instruction        = QSPI_FLASH_CMD_READ;
+    xfer.option            = 0U;
+    xfer.width              = SINGLE_BIT_SPI;
+    xfer.addr_len          = ADDRL_24_BIT;
+    xfer.option_en          = false;
+    xfer.option_len         = OPTL_1_BIT;
+    xfer.continuous_read_en = false;
+    xfer.dummy_cycles       = 0U;
+
+    return QSPI_MemoryRead(&xfer, (uint32_t *)buf, len, addr);
+}
+
+/* Bring-up self test: read JEDEC ID, erase the first sector, write 16 test
+ * bytes, read back and compare. Note this erases/programs that sector on every
+ * boot; once the link is proven, replace it with ID/head-word read only. */
+static void QSPI_FlashSelfTest(void)
+{
+    uint8_t id[3] = { 0xFFU, 0xFFU, 0xFFU };
+    static uint32_t txBuf[QSPI_FLASH_PAGE_SIZE / 4U];
+    static uint32_t rxBuf[QSPI_FLASH_PAGE_SIZE / 4U];
+    uint32_t i;
+    char line[32];
+
+    if (!QSPI_FlashReadJedecId(id))
+    {
+        Uart_WriteStr("QSPI: no response\r\n");
+        return;
+    }
+
+    (void)snprintf(line, sizeof(line), "QSPI ID: %02X %02X %02X\r\n",
+                   id[0], id[1], id[2]);
+    Uart_WriteStr(line);
+
+    for (i = 0U; i < 16U; i++)
+    {
+        ((uint8_t *)txBuf)[i] = (uint8_t)(0xA0U + i);
+    }
+
+    if (!QSPI_FlashSectorErase(QSPI_FLASH_TEST_ADDR))
+    {
+        Uart_WriteStr("QSPI erase busy timeout\r\n");
+        return;
+    }
+
+    if (!QSPI_FlashPageProgram(QSPI_FLASH_TEST_ADDR, (const uint8_t *)txBuf, 16U))
+    {
+        Uart_WriteStr("QSPI program busy timeout\r\n");
+        return;
+    }
+
+    if (!QSPI_FlashRead(QSPI_FLASH_TEST_ADDR, (uint8_t *)rxBuf, 16U))
+    {
+        Uart_WriteStr("QSPI read fail\r\n");
+        return;
+    }
+
+    for (i = 0U; i < 16U; i++)
+    {
+        if (((uint8_t *)rxBuf)[i] != ((uint8_t *)txBuf)[i])
+        {
+            Uart_WriteStr("QSPI RW MISMATCH\r\n");
+            return;
+        }
+    }
+
+    Uart_WriteStr("QSPI RW OK\r\n");
+}
+
 // *****************************************************************************
 // Application version identification
 // *****************************************************************************
@@ -468,6 +681,9 @@ int main ( void )
 
     /* Bit-bang I2C bus (PD08=SCL, PD09=SDA) for the on-board MCP9804. */
     I2C_BusInit();
+
+    /* QSPI serial flash (SST26VF064BA, U700): probe ID and 16-byte loopback. */
+    QSPI_FlashSelfTest();
 
     /* ---- WDT: hand it over from BL to APP ---- */
     WDT_TimeoutPeriodSet(WDT_TIMEOUT_2S);
