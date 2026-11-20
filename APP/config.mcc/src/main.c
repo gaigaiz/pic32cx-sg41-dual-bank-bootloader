@@ -383,6 +383,20 @@ static bool QSPI_FlashReadJedecId(uint8_t id[3])
     return true;
 }
 
+static void QSPI_PrintBuf(const char *tag, const uint8_t *buf, uint32_t len)
+{
+    char line[8];
+
+    Uart_WriteStr(tag);
+    Uart_WriteStr(":");
+    for (uint32_t i = 0U; i < len; i++)
+    {
+        (void)snprintf(line, sizeof(line), " %02X", buf[i]);
+        Uart_WriteStr(line);
+    }
+    Uart_WriteStr("\r\n");
+}
+
 static bool QSPI_FlashWriteEnable(void)
 {
     qspi_command_xfer_t xfer;
@@ -481,6 +495,7 @@ static void QSPI_FlashSelfTest(void)
     static uint32_t rxBuf[QSPI_FLASH_PAGE_SIZE / 4U];
     uint32_t i;
     char line[32];
+    uint8_t sr;
 
     if (!QSPI_FlashReadJedecId(id))
     {
@@ -490,6 +505,16 @@ static void QSPI_FlashSelfTest(void)
 
     (void)snprintf(line, sizeof(line), "QSPI ID: %02X %02X %02X\r\n",
                    id[0], id[1], id[2]);
+    Uart_WriteStr(line);
+
+    /* Write-enable link check: after WREN the WEL bit should latch to 1.
+     * If WEL stays 0, the erase/program commands are ignored by the flash. */
+    (void)QSPI_FlashWriteEnable();
+    sr = QSPI_FlashReadStatus();
+    (void)snprintf(line, sizeof(line), "WREN SR: %02X  WEL=%d BUSY=%d\r\n",
+                   sr,
+                   ((sr & QSPI_FLASH_SR_WEL) != 0U) ? 1 : 0,
+                   ((sr & QSPI_FLASH_SR_BUSY) != 0U) ? 1 : 0);
     Uart_WriteStr(line);
 
     for (i = 0U; i < 16U; i++)
@@ -503,6 +528,13 @@ static void QSPI_FlashSelfTest(void)
         return;
     }
 
+    if (!QSPI_FlashRead(QSPI_FLASH_TEST_ADDR, (uint8_t *)rxBuf, 16U))
+    {
+        Uart_WriteStr("QSPI read fail after erase\r\n");
+        return;
+    }
+    QSPI_PrintBuf("ERASED  ", (const uint8_t *)rxBuf, 16U);
+
     if (!QSPI_FlashPageProgram(QSPI_FLASH_TEST_ADDR, (const uint8_t *)txBuf, 16U))
     {
         Uart_WriteStr("QSPI program busy timeout\r\n");
@@ -511,9 +543,11 @@ static void QSPI_FlashSelfTest(void)
 
     if (!QSPI_FlashRead(QSPI_FLASH_TEST_ADDR, (uint8_t *)rxBuf, 16U))
     {
-        Uart_WriteStr("QSPI read fail\r\n");
+        Uart_WriteStr("QSPI read fail after program\r\n");
         return;
     }
+    QSPI_PrintBuf("READBACK", (const uint8_t *)rxBuf, 16U);
+    QSPI_PrintBuf("EXPECT  ", (const uint8_t *)txBuf, 16U);
 
     for (i = 0U; i < 16U; i++)
     {
