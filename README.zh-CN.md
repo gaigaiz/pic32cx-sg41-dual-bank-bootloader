@@ -6,6 +6,9 @@
 UART Bootloader，支持硬件双 Bank（A/B）OTA、APP CRC 校验、版本记录，以及看门狗
 （WDT）监护下的自动回滚。
 
+APP 侧还通过位带模拟 I2C 读取板载 MCP9804 温度传感器，并把外部 SST26VF064BA
+QSPI 串口 Flash 作为镜像 / 数据存储接入。
+
 ## 1. 项目解决的问题
 
 通过串口升级 MCU 固件时，如果写入中途掉电，或者新固件一启动就跑飞，设备就可能
@@ -30,6 +33,13 @@ OTA 暂存区。新 APP 先写入非活动 Bank 并做 CRC 校验，确认无误
     BL 停留在升级模式（两块 Bank 都不可用）。
 - **返回 Bootloader**：长按 SW1（PD00）3 秒；APP 写入 RAM 触发魔术字后复位，
   BL 检测到该魔术字后停留在升级模式。
+- **时钟**：外部 XOSC1 12 MHz，同时作为 CPU 和 SERCOM4 时钟源。
+- **软件 I2C 温度采集**：PD08=SCL、PD09=SDA；读取板载 MCP9804（7 位地址
+  `0x18`，温度寄存器 `0x05`），每秒经 SERCOM4 上报一次。
+- **外部 QSPI 串口 Flash**：SST26VF064BA（U700，8 MiB），引脚 PA08-QIO0 至
+  PA11-QIO3、PB10-SCK、PB11-CS；单线 SPI（1-1-1），Mode 0。上电后 APP 读取
+  JEDEC ID 并做 16 字节擦除 / 编程 / 回读回环。该 Flash 上电默认块保护，每次复位后
+  需先发一次 `0x98`（ULBPR）全局解锁。它只用于存镜像 / 数据，不作为启动源。
 
 ## 3. 硬件与 Flash 布局
 
@@ -60,6 +70,11 @@ Flash 页大小 = 512 字节，擦除块大小 = 8192 字节。
 | SW1 | PD00 | 输入，内部上拉，低电平有效 |
 | LED1 | PC21 | 输出，低电平点亮 |
 | LED2 | PA16 | 输出，低电平点亮 |
+| I2C SCL | PD08 | 软件 I2C 时钟，开漏方式 |
+| I2C SDA | PD09 | 软件 I2C 数据，开漏方式 |
+| QSPI QIO0..3 | PA08..PA11 | QSPI 数据 0..3 |
+| QSPI SCK | PB10 | QSPI 时钟 |
+| QSPI CS | PB11 | QSPI 片选 |
 
 ## 4. 目录结构
 
@@ -79,7 +94,9 @@ Flash 页大小 = 512 字节，擦除块大小 = 8192 字节。
 │           └── peripheral/nvmctrl/plib_nvmctrl.c
 ├── APP/                      APP 应用工程
 │   ├── .vscode/APP.mplab.json APP 链接宏 / 堆 / 优化等级
-│   └── config.mcc/src/main.c
+│   └── config.mcc/src/
+│       ├── main.c
+│       └── config/default/peripheral/qspi/plib_qspi.c
 ├── Tools/
 │   ├── btl_host.py           官方上位机（只接收 raw binary）
 │   ├── make_merged_bin.py    由 HEX 生成 bl.bin / app.bin / merged_bl_app.bin
@@ -92,6 +109,7 @@ Flash 页大小 = 512 字节，擦除块大小 = 8192 字节。
 
 - **工具链**：XC32 v5.10，MPLAB VSCode 插件（自带 CMake + Ninja）。
 - **调试器**：板载 PKOB4。
+- **时钟**：XOSC1 外接 12 MHz 晶振，作为 CPU 和 SERCOM4 时钟源。
 - **Python 3**：用于上位机工具和镜像脚本。
 - 用 MCC 重新生成代码后，需把 `APP.mplab.json` 的 `ROM_LENGTH` 改回
   `0x7C000`，以保护状态扇区（MCC 生成时会把它重置为 `0xFE000`）。
@@ -197,6 +215,10 @@ python Tools/btl_host.py -v -s -i COM3 -d PIC32CX_SG41 -a 0x80000 -f BL/out/BL/m
   （上位机工具会自动处理）。
 - OTA 日志里出现 `Verification success` / `Reboot Done` 后，不要仅凭这两句判断
   当前活动 Bank；应在调试器内存窗口读 `NVMCTRL_STATUS.AFIRST` 确认当前是哪块 Bank。
+- 外部 QSPI Flash 只用于存镜像 / 数据，MCU 仍从内部 Flash 启动。当前自检每次上电
+  都会擦写 `0x000000` 扇区；链路验证通过后，若该扇区要存放真实数据，应去掉这段回环。
+- SST26VF064BA 上电默认写保护，在发送 `0x98` ULBPR 全局解锁命令之前，擦除 / 编程
+  会被忽略。
 
 ## 9. 相关文档
 

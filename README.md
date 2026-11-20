@@ -6,6 +6,10 @@ A UART bootloader with hardware dual-bank (A/B) OTA, APP CRC verification,
 version tracking, and watchdog (WDT) supervised rollback for the
 **PIC32CX1025SG41128** (Cortex-M4, 1 MB Flash, 256 KB RAM).
 
+The APP additionally samples the on-board MCP9804 temperature sensor over a
+bit-banged I2C bus and brings up the external SST26VF064BA QSPI serial flash
+as image/data storage.
+
 ## 1. What this project solves
 
 Updating MCU firmware over a serial port can brick the device if power is cut
@@ -35,6 +39,15 @@ in bootloader upgrade mode.
     swapped bank also fails 3 times, the BL stays in upgrade mode (both banks dead).
 - **Return to bootloader**: hold SW1 (PD00) for 3 seconds; the APP writes a RAM
   trigger magic and resets, and the BL detects the magic and stays in upgrade mode.
+- **Clock**: external XOSC1 12 MHz feeds the CPU and SERCOM4.
+- **Bit-banged I2C temperature read**: PD08=SCL, PD09=SDA; reads the on-board
+  MCP9804 (7-bit address `0x18`, temperature register `0x05`) and reports it over
+  SERCOM4 once per second.
+- **External QSPI serial flash**: SST26VF064BA (U700, 8 MiB) on PA08-QIO0 through
+  PA11-QIO3, PB10-SCK, PB11-CS; single-bit SPI (1-1-1), Mode 0. On boot the APP
+  reads the JEDEC ID and runs a 16-byte erase/program/read-back loopback. The flash
+  powers up block-protected, so the `0x98` (ULBPR) global unlock is issued once after
+  every reset. It is used as image/data storage, not as a boot source.
 
 ## 3. Hardware and Flash layout
 
@@ -65,6 +78,11 @@ Flash page = 512 bytes, erase block = 8192 bytes.
 | SW1 | PD00 | Input, internal pull-up, active low |
 | LED1 | PC21 | Output, active low |
 | LED2 | PA16 | Output, active low |
+| I2C SCL | PD08 | Bit-bang I2C clock, open-drain style |
+| I2C SDA | PD09 | Bit-bang I2C data, open-drain style |
+| QSPI QIO0..3 | PA08..PA11 | QSPI data 0..3 |
+| QSPI SCK | PB10 | QSPI clock |
+| QSPI CS | PB11 | QSPI chip select |
 
 ## 4. Directory structure
 
@@ -84,7 +102,9 @@ Flash page = 512 bytes, erase block = 8192 bytes.
 │           └── peripheral/nvmctrl/plib_nvmctrl.c
 ├── APP/                      APP application project
 │   ├── .vscode/APP.mplab.json APP linker macros / heap / optimization
-│   └── config.mcc/src/main.c
+│   └── config.mcc/src/
+│       ├── main.c
+│       └── config/default/peripheral/qspi/plib_qspi.c
 ├── Tools/
 │   ├── btl_host.py           Official host tool (raw binary only)
 │   ├── make_merged_bin.py    Build bl.bin / app.bin / merged_bl_app.bin from HEX
@@ -97,6 +117,7 @@ Flash page = 512 bytes, erase block = 8192 bytes.
 
 - **Toolchain**: XC32 v5.10, MPLAB VSCode extension (bundled CMake + Ninja).
 - **Debugger**: on-board PKOB4.
+- **Clock**: 12 MHz external crystal on XOSC1, used as the CPU and SERCOM4 clock.
 - **Python 3** for the host tools and image scripts.
 - After generating code with MCC, restore `APP.mplab.json` `ROM_LENGTH` to
   `0x7C000` so the state sector is protected (MCC generate resets it to `0xFE000`).
@@ -205,6 +226,11 @@ Reply:  51
 - After the OTA log reports `Verification success` / `Reboot Done`, do not rely
   on those strings to judge the active bank; read `NVMCTRL_STATUS.AFIRST` in the
   debugger memory window to confirm which bank is active.
+- The external QSPI flash stores images/data only; the MCU boots from internal
+  Flash. The current self-test erases/programs sector `0x000000` on every boot;
+  remove that loopback once the link is proven if the sector holds real data.
+- SST26VF064BA powers up write-protected; erase/program are ignored until the
+  `0x98` ULBPR global unlock command is sent.
 
 ## 9. Documentation
 
