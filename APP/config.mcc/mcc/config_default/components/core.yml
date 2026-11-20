@@ -1652,7 +1652,7 @@ data:
       - children:
         - attributes:
             id: core
-            value: '0x0'
+            value: '0x300'
           type: Dynamic
         type: Values
       type: String
@@ -2331,6 +2331,222 @@ data:
           type: User
         type: Values
       type: Integer
+    PIN_47_MODE:
+      attributes:
+        id: PIN_47_MODE
+        label: Mode
+      children:
+      - children:
+        - attributes:
+            value: ''
+          type: User
+        type: Values
+      type: String
+    PIN_47_FUNCTION_TYPE:
+      attributes:
+        id: PIN_47_FUNCTION_TYPE
+        label: Type
+      children:
+      - children:
+        - attributes:
+            value: GPIO
+          type: User
+        type: Values
+      type: String
+    PORT_GROUP_3_PINCFG8:
+      attributes:
+        id: PORT_GROUP_3_PINCFG8
+        label: PORT GROUP D PINCFG8
+      children:
+      - children:
+        - attributes:
+            id: core
+            value: '0x2'
+          type: Dynamic
+        type: Values
+      type: String
+    PORT_GROUP_3_PIN_8_USED:
+      attributes:
+        id: PORT_GROUP_3_PIN_8_USED
+        label: PORT_GROUP_3_PIN_8_USED
+      children:
+      - children:
+        - attributes:
+            id: core
+            value: 'true'
+          type: Dynamic
+        type: Values
+      type: Boolean
+    PIN_47_INEN:
+      attributes:
+        id: PIN_47_INEN
+        label: Input Enable
+      children:
+      - children:
+        - attributes:
+            value: 'True'
+          type: User
+        type: Values
+      type: String
+    PIN_47_DIR:
+      attributes:
+        id: PIN_47_DIR
+        label: Direction
+      children:
+      - children:
+        - attributes:
+            value: Out
+          type: User
+        type: Values
+      type: String
+    PORT_GROUP_3_PMUX4:
+      attributes:
+        id: PORT_GROUP_3_PMUX4
+        label: PORT GROUP D PMUX4
+      children:
+      - children:
+        - attributes:
+            id: core
+            value: '0x0'
+          type: Dynamic
+        type: Values
+      type: String
+    PORT_GROUP_3_PAD_8:
+      attributes:
+        id: PORT_GROUP_3_PAD_8
+        label: PORT_GROUP_3_PAD_8
+      children:
+      - children:
+        - attributes:
+            id: core
+            value: PD08
+          type: Dynamic
+        type: Values
+      type: String
+    PIN_47_PERIPHERAL_FUNCTION:
+      attributes:
+        id: PIN_47_PERIPHERAL_FUNCTION
+        label: Peripheral Selection
+      children:
+      - children:
+        - attributes:
+            value: GPIO
+          type: User
+        type: Values
+      type: String
+    PIN_47_FUNCTION_NAME:
+      attributes:
+        id: PIN_47_FUNCTION_NAME
+        label: Name
+      children:
+      - children:
+        - attributes:
+            value: Tem_SCL
+          type: User
+        type: Values
+      type: String
+    PIN_48_MODE:
+      attributes:
+        id: PIN_48_MODE
+        label: Mode
+      children:
+      - children:
+        - attributes:
+            value: ''
+          type: User
+        type: Values
+      type: String
+    PIN_48_FUNCTION_TYPE:
+      attributes:
+        id: PIN_48_FUNCTION_TYPE
+        label: Type
+      children:
+      - children:
+        - attributes:
+            value: GPIO
+          type: User
+        type: Values
+      type: String
+    PORT_GROUP_3_PINCFG9:
+      attributes:
+        id: PORT_GROUP_3_PINCFG9
+        label: PORT GROUP D PINCFG9
+      children:
+      - children:
+        - attributes:
+            id: core
+            value: '0x2'
+          type: Dynamic
+        type: Values
+      type: String
+    PORT_GROUP_3_PIN_9_USED:
+      attributes:
+        id: PORT_GROUP_3_PIN_9_USED
+        label: PORT_GROUP_3_PIN_9_USED
+      children:
+      - children:
+        - attributes:
+            id: core
+            value: 'true'
+          type: Dynamic
+        type: Values
+      type: Boolean
+    PIN_48_INEN:
+      attributes:
+        id: PIN_48_INEN
+        label: Input Enable
+      children:
+      - children:
+        - attributes:
+            value: 'True'
+          type: User
+        type: Values
+      type: String
+    PIN_48_DIR:
+      attributes:
+        id: PIN_48_DIR
+        label: Direction
+      children:
+      - children:
+        - attributes:
+            value: Out
+          type: User
+        type: Values
+      type: String
+    PORT_GROUP_3_PAD_9:
+      attributes:
+        id: PORT_GROUP_3_PAD_9
+        label: PORT_GROUP_3_PAD_9
+      children:
+      - children:
+        - attributes:
+            id: core
+            value: PD09
+          type: Dynamic
+        type: Values
+      type: String
+    PIN_48_PERIPHERAL_FUNCTION:
+      attributes:
+        id: PIN_48_PERIPHERAL_FUNCTION
+        label: Peripheral Selection
+      children:
+      - children:
+        - attributes:
+            value: GPIO
+          type: User
+        type: Values
+      type: String
+    PIN_48_FUNCTION_NAME:
+      attributes:
+        id: PIN_48_FUNCTION_NAME
+        label: Name
+      children:
+      - children:
+        - attributes:
+            value: Tem_SDA
+          type: User
+        type: Values
+      type: String
   userData:
     children:
     - attributes:

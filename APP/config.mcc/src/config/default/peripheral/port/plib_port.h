@@ -85,6 +85,24 @@
 #define RX_Get()               (((PORT_REGS->GROUP[1].PORT_IN >> 13U)) & 0x01U)
 #define RX_PIN                  PORT_PIN_PB13
 
+/*** Macros for Tem_SCL pin ***/
+#define Tem_SCL_Set()               (PORT_REGS->GROUP[3].PORT_OUTSET = ((uint32_t)1U << 8U))
+#define Tem_SCL_Clear()             (PORT_REGS->GROUP[3].PORT_OUTCLR = ((uint32_t)1U << 8U))
+#define Tem_SCL_Toggle()            (PORT_REGS->GROUP[3].PORT_OUTTGL = ((uint32_t)1U << 8U))
+#define Tem_SCL_OutputEnable()      (PORT_REGS->GROUP[3].PORT_DIRSET = ((uint32_t)1U << 8U))
+#define Tem_SCL_InputEnable()       (PORT_REGS->GROUP[3].PORT_DIRCLR = ((uint32_t)1U << 8U))
+#define Tem_SCL_Get()               (((PORT_REGS->GROUP[3].PORT_IN >> 8U)) & 0x01U)
+#define Tem_SCL_PIN                  PORT_PIN_PD08
+
+/*** Macros for Tem_SDA pin ***/
+#define Tem_SDA_Set()               (PORT_REGS->GROUP[3].PORT_OUTSET = ((uint32_t)1U << 9U))
+#define Tem_SDA_Clear()             (PORT_REGS->GROUP[3].PORT_OUTCLR = ((uint32_t)1U << 9U))
+#define Tem_SDA_Toggle()            (PORT_REGS->GROUP[3].PORT_OUTTGL = ((uint32_t)1U << 9U))
+#define Tem_SDA_OutputEnable()      (PORT_REGS->GROUP[3].PORT_DIRSET = ((uint32_t)1U << 9U))
+#define Tem_SDA_InputEnable()       (PORT_REGS->GROUP[3].PORT_DIRCLR = ((uint32_t)1U << 9U))
+#define Tem_SDA_Get()               (((PORT_REGS->GROUP[3].PORT_IN >> 9U)) & 0x01U)
+#define Tem_SDA_PIN                  PORT_PIN_PD09
+
 /*** Macros for LED2 pin ***/
 #define LED2_Set()               (PORT_REGS->GROUP[0].PORT_OUTSET = ((uint32_t)1U << 16U))
 #define LED2_Clear()             (PORT_REGS->GROUP[0].PORT_OUTCLR = ((uint32_t)1U << 16U))

@@ -33,8 +33,8 @@ Pin Number,Pin ID,Custom Name,Function,Mode, Direction,Latch,Pull Up,Pull Down,D
 42,PB13,RX,SERCOM4_PAD1,Digital,High Impedance,n/a,No,No,NORMAL
 43,PB14,,Available,,,,,,NORMAL
 44,PB15,,Available,,,,,,NORMAL
-47,PD08,,Available,,,,,,NORMAL
-48,PD09,,Available,,,,,,NORMAL
+47,PD08,Tem_SCL,GPIO,Digital,In/Out,Low,,,NORMAL
+48,PD09,Tem_SDA,GPIO,Digital,In/Out,Low,,,NORMAL
 49,PD10,,Available,,,,,,NORMAL
 50,PD11,,Available,,,,,,NORMAL
 51,PD12,,Available,,,,,,NORMAL

@@ -31,3 +31,6 @@ nbproject/private/
 
 # 个人敏感备份码 / 账号凭据，禁止入库
 docs/Backup-codes-max.lin.txt
+
+# 公开数据手册 / 用户指南（体积大，可从 Microchip 官网下载，不随仓库分发）
+docs/*.pdf
