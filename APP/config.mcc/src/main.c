@@ -328,6 +328,7 @@ static void MCP9804_ReportTemperature(void)
 #define QSPI_FLASH_CMD_PP               0x02U
 #define QSPI_FLASH_CMD_SECTOR_ERASE     0x20U
 #define QSPI_FLASH_CMD_READ             0x03U
+#define QSPI_FLASH_CMD_ULBPR            0x98U  /* Global Block Protection Unlock */
 
 #define QSPI_FLASH_SR_BUSY              0x01U
 #define QSPI_FLASH_SR_WEL               0x02U
@@ -428,6 +429,27 @@ static bool QSPI_FlashWriteEnable(void)
     xfer.addr_len    = ADDRL_24_BIT;
 
     return QSPI_CommandWrite(&xfer, 0U);
+}
+
+/* SST26VF064B/BA powers up write-protected by default. The ULBPR (0x98)
+ * command clears every block-protection bit; erase/program stay ignored until
+ * this is issued once after every reset. */
+static bool QSPI_FlashGlobalUnlock(void)
+{
+    qspi_command_xfer_t xfer;
+    bool stepOk;
+
+    stepOk = QSPI_FlashWriteEnable();
+    QSPI_PrintBool("  unlock: WREN", stepOk);
+
+    xfer.instruction = QSPI_FLASH_CMD_ULBPR;
+    xfer.width       = SINGLE_BIT_SPI;
+    xfer.addr_en     = false;
+    xfer.addr_len    = ADDRL_24_BIT;
+
+    stepOk = QSPI_CommandWrite(&xfer, 0U);
+    QSPI_PrintBool("  unlock: ULBPR", stepOk);
+    return stepOk;
 }
 
 static bool QSPI_FlashSectorErase(uint32_t addr)
@@ -547,6 +569,12 @@ static void QSPI_FlashSelfTest(void)
     (void)snprintf(line, sizeof(line), "QSPI ID: %02X %02X %02X\r\n",
                    id[0], id[1], id[2]);
     Uart_WriteStr(line);
+
+    /* Default after power-on: whole array block-protected. Clear it first,
+     * otherwise erase/program are silently accepted but never run. */
+    Uart_WriteStr("-- global block unlock --\r\n");
+    (void)QSPI_FlashGlobalUnlock();
+    QSPI_PrintStatus("unlock");
 
     /* Write-enable link check: after WREN the WEL bit should latch to 1.
      * If WEL stays 0, the erase/program commands are ignored by the flash. */
