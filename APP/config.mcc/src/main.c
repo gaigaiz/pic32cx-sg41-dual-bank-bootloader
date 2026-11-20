@@ -26,6 +26,7 @@
 #include <stdbool.h>                    // Defines true
 #include <stdlib.h>                     // Defines EXIT_FAILURE
 #include <stdint.h>
+#include <stdio.h>                      // snprintf for temperature report
 #include "definitions.h"                // SYS function prototypes
 #include "core_cm4.h"                   // DWT cycle counter and NVIC_SystemReset
 
@@ -86,6 +87,233 @@ static void App_DelayMs(uint32_t ms)
     }
 }
 
+static void Uart_WriteStr(const char *msg)
+{
+    while (*msg != '\0')
+    {
+        while ((SERCOM4_REGS->USART_INT.SERCOM_INTFLAG & SERCOM_USART_INT_INTFLAG_DRE_Msk) == 0U)
+        {
+        }
+
+        SERCOM4_REGS->USART_INT.SERCOM_DATA = (uint8_t)*msg;
+        msg++;
+    }
+
+    while (SERCOM4_USART_TransmitComplete() == false)
+    {
+    }
+}
+
+/* -------------------------------------------------------------------------- */
+/* Bit-bang I2C on PD08=SCL, PD09=SDA (on-board MCP9804, U900)                */
+/* -------------------------------------------------------------------------- */
+#define MCP9804_ADDR            0x18U   /* 7-bit address, A2/A1/A0 tied low    */
+#define MCP9804_REG_TEMP        0x05U   /* TA ambient temperature register     */
+#define MCP9804_WR_ADDR         (MCP9804_ADDR << 1U)         /* 0x30          */
+#define MCP9804_RD_ADDR         ((MCP9804_ADDR << 1U) | 1U)  /* 0x31          */
+
+#define I2C_HALF_BIT_US         5U      /* ~100kHz standard mode, half period  */
+
+static void I2C_DelayUs(uint32_t us)
+{
+    volatile uint32_t cycles = us * (CPU_CLOCK_FREQUENCY / 1000000U);
+    while (cycles-- != 0U)
+    {
+        __NOP();
+    }
+}
+
+/* Open-drain style: release the line (input + pull-up) to go high, drive low. */
+#define I2C_SCL_High()   do { Tem_SCL_Set();      Tem_SCL_InputEnable();   } while (0)
+#define I2C_SCL_Low()    do { Tem_SCL_Clear();    Tem_SCL_OutputEnable();  } while (0)
+#define I2C_SDA_High()   do { Tem_SDA_Set();      Tem_SDA_InputEnable();   } while (0)
+#define I2C_SDA_Low()    do { Tem_SDA_Clear();    Tem_SDA_OutputEnable();  } while (0)
+#define I2C_SDA_READ()   (Tem_SDA_Get() != 0U)
+
+static void I2C_BusInit(void)
+{
+    /* Internal pull-up as a backup if the board has no external I2C pull-ups. */
+    PORT_REGS->GROUP[3].PORT_PINCFG[8] |= PORT_PINCFG_PULLEN_Msk;
+    PORT_REGS->GROUP[3].PORT_PINCFG[9] |= PORT_PINCFG_PULLEN_Msk;
+
+    I2C_SCL_High();
+    I2C_SDA_High();
+    I2C_DelayUs(I2C_HALF_BIT_US);
+}
+
+static void I2C_Start(void)
+{
+    I2C_SDA_High();
+    I2C_SCL_High();
+    I2C_DelayUs(I2C_HALF_BIT_US);
+    I2C_SDA_Low();
+    I2C_DelayUs(I2C_HALF_BIT_US);
+    I2C_SCL_Low();
+    I2C_DelayUs(I2C_HALF_BIT_US);
+}
+
+static void I2C_Stop(void)
+{
+    I2C_SDA_Low();
+    I2C_DelayUs(I2C_HALF_BIT_US);
+    I2C_SCL_High();
+    I2C_DelayUs(I2C_HALF_BIT_US);
+    I2C_SDA_High();
+    I2C_DelayUs(I2C_HALF_BIT_US);
+}
+
+/* Returns true when the slave ACKs the byte. */
+static bool I2C_WriteByte(uint8_t byte)
+{
+    uint8_t bit;
+    bool ack;
+
+    for (bit = 0U; bit < 8U; bit++)
+    {
+        if ((byte & 0x80U) != 0U)
+        {
+            I2C_SDA_High();
+        }
+        else
+        {
+            I2C_SDA_Low();
+        }
+        I2C_DelayUs(I2C_HALF_BIT_US);
+        I2C_SCL_High();
+        I2C_DelayUs(I2C_HALF_BIT_US);
+        I2C_SCL_Low();
+        I2C_DelayUs(I2C_HALF_BIT_US);
+        byte <<= 1U;
+    }
+
+    /* Ninth clock: slave drives SDA low to ACK. */
+    I2C_SDA_High();
+    I2C_DelayUs(I2C_HALF_BIT_US);
+    I2C_SCL_High();
+    I2C_DelayUs(I2C_HALF_BIT_US);
+    ack = !I2C_SDA_READ();
+    I2C_SCL_Low();
+    I2C_DelayUs(I2C_HALF_BIT_US);
+
+    return ack;
+}
+
+/* Reads one byte. masterAck=true sends ACK (more follow), false sends NACK. */
+static uint8_t I2C_ReadByte(bool masterAck)
+{
+    uint8_t bit;
+    uint8_t byte = 0U;
+
+    I2C_SDA_High();
+    for (bit = 0U; bit < 8U; bit++)
+    {
+        byte <<= 1U;
+        I2C_SCL_High();
+        I2C_DelayUs(I2C_HALF_BIT_US);
+        if (I2C_SDA_READ())
+        {
+            byte |= 1U;
+        }
+        I2C_SCL_Low();
+        I2C_DelayUs(I2C_HALF_BIT_US);
+    }
+
+    if (masterAck)
+    {
+        I2C_SDA_Low();
+    }
+    else
+    {
+        I2C_SDA_High();
+    }
+    I2C_DelayUs(I2C_HALF_BIT_US);
+    I2C_SCL_High();
+    I2C_DelayUs(I2C_HALF_BIT_US);
+    I2C_SCL_Low();
+    I2C_DelayUs(I2C_HALF_BIT_US);
+    I2C_SDA_High();
+
+    return byte;
+}
+
+/* Reads the 16-bit TA register. Returns true on success. */
+static bool MCP9804_ReadRaw(int16_t *rawOut)
+{
+    uint8_t msb;
+    uint8_t lsb;
+
+    I2C_Start();
+    if (!I2C_WriteByte(MCP9804_WR_ADDR))   { I2C_Stop(); return false; }
+    if (!I2C_WriteByte(MCP9804_REG_TEMP))  { I2C_Stop(); return false; }
+
+    I2C_Start();   /* repeated start */
+    if (!I2C_WriteByte(MCP9804_RD_ADDR))  { I2C_Stop(); return false; }
+
+    msb = I2C_ReadByte(true);
+    lsb = I2C_ReadByte(false);
+    I2C_Stop();
+
+    *rawOut = (int16_t)(((uint16_t)msb << 8) | lsb);
+    return true;
+}
+
+/* Converts to temperature in hundredths of a degree Celsius (x100, integer). */
+static bool MCP9804_ReadTempC100(int32_t *tempC100)
+{
+    int16_t raw;
+    uint16_t data;
+
+    if (!MCP9804_ReadRaw(&raw))
+    {
+        return false;
+    }
+
+    data = (uint16_t)raw & 0x0FFFU;
+    if ((raw & 0x1000U) != 0U)
+    {
+        /* Negative: data/16 - 256, scaled by 100. */
+        *tempC100 = (int32_t)data * 100 / 16 - 25600;
+    }
+    else
+    {
+        *tempC100 = (int32_t)data * 100 / 16;
+    }
+    return true;
+}
+
+static void MCP9804_ReportTemperature(void)
+{
+    int32_t t100;
+    char sign;
+    int32_t absT;
+    int32_t whole;
+    int32_t frac;
+    char line[24];
+
+    if (!MCP9804_ReadTempC100(&t100))
+    {
+        Uart_WriteStr("Temp: I2C ERR\r\n");
+        return;
+    }
+
+    if (t100 < 0)
+    {
+        sign = '-';
+        absT = -t100;
+    }
+    else
+    {
+        sign = '+';
+        absT = t100;
+    }
+    whole = absT / 100;
+    frac  = absT % 100;
+
+    (void)snprintf(line, sizeof(line), "Temp: %c%ld.%02ld C\r\n",
+                   sign, (long)whole, (long)frac);
+    Uart_WriteStr(line);
+}
+
 // *****************************************************************************
 // Application version identification
 // *****************************************************************************
@@ -113,6 +341,9 @@ static void App_DelayMs(uint32_t ms)
 #define CYCLES_PER_MS               (CPU_CLOCK_FREQUENCY / 1000U)
 #define SW1_HOLD_THRESHOLD_CYCLES   ((uint32_t)SW1_HOLD_TIME_MS * CYCLES_PER_MS)
 #define SW1_DEBOUNCE_CYCLES         ((uint32_t)SW1_DEBOUNCE_TIME_MS * CYCLES_PER_MS)
+
+#define TEMP_REPORT_PERIOD_MS       1000U
+#define TEMP_REPORT_PERIOD_CYCLES   ((uint32_t)TEMP_REPORT_PERIOD_MS * CYCLES_PER_MS)
 
 typedef enum
 {
@@ -235,6 +466,9 @@ int main ( void )
 
     DWT_CycleCounterInit();
 
+    /* Bit-bang I2C bus (PD08=SCL, PD09=SDA) for the on-board MCP9804. */
+    I2C_BusInit();
+
     /* ---- WDT: hand it over from BL to APP ---- */
     WDT_TimeoutPeriodSet(WDT_TIMEOUT_2S);
     WDT_Enable();
@@ -248,11 +482,21 @@ int main ( void )
     /* Write success marker: clear retry_cnt and bankswapped in the state sector. */
     App_FailSafeMarkStarted();
 
+    static uint32_t lastTempAt = 0U;
+
     while ( true )
     {
         WDT_Clear();   /* feed the dog every loop */
 
         SW1_KeyTasks();
+
+        /* Report on-board MCP9804 temperature once per second. */
+        uint32_t now = DWT->CYCCNT;
+        if ((now - lastTempAt) >= TEMP_REPORT_PERIOD_CYCLES)
+        {
+            lastTempAt = now;
+            MCP9804_ReportTemperature();
+        }
 
         /* Maintain state machines of all polled MPLAB Harmony modules. */
         SYS_Tasks ( );
