@@ -7,7 +7,7 @@
             "device": "PIC32CX1025SG41128",
             "imagePath": "./out/BL/default.elf",
             "toolProperties": "default-tool-base",
-            "tool": "Simulator",
+            "tool": "Curiosity/Starter Kits (PKOB4)",
             "packs": [
                 {
                     "name": "PIC32CX-SG41_DFP",
