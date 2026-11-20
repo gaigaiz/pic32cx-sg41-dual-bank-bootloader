@@ -1100,7 +1100,7 @@ data:
       - children:
         - attributes:
             id: core
-            value: '0'
+            value: '12000000'
           type: Dynamic
         type: Values
       type: Integer
@@ -2205,7 +2205,7 @@ data:
       - children:
         - attributes:
             id: core
-            value: '8000000'
+            value: '0'
           type: Dynamic
         type: Values
       type: Integer
@@ -2216,7 +2216,7 @@ data:
       children:
       - children:
         - attributes:
-            value: 'true'
+            value: 'false'
           type: User
         type: Values
       type: Boolean
@@ -2547,6 +2547,566 @@ data:
           type: User
         type: Values
       type: String
+    PIN_33_MODE:
+      attributes:
+        id: PIN_33_MODE
+        label: Mode
+      children:
+      - children:
+        - attributes:
+            value: ''
+          type: User
+        type: Values
+      type: String
+    PIN_33_FUNCTION_TYPE:
+      attributes:
+        id: PIN_33_FUNCTION_TYPE
+        label: Type
+      children:
+      - children:
+        - attributes:
+            value: QSPI_DATA0
+          type: User
+        type: Values
+      type: String
+    PORT_GROUP_0_PMUX4:
+      attributes:
+        id: PORT_GROUP_0_PMUX4
+        label: PORT GROUP A PMUX4
+      children:
+      - children:
+        - attributes:
+            id: core
+            value: '0x77'
+          type: Dynamic
+        type: Values
+      type: String
+    PORT_GROUP_0_PAD_8:
+      attributes:
+        id: PORT_GROUP_0_PAD_8
+        label: PORT_GROUP_0_PAD_8
+      children:
+      - children:
+        - attributes:
+            id: core
+            value: PA08
+          type: Dynamic
+        type: Values
+      type: String
+    PORT_GROUP_0_PINCFG8:
+      attributes:
+        id: PORT_GROUP_0_PINCFG8
+        label: PORT GROUP A PINCFG8
+      children:
+      - children:
+        - attributes:
+            id: core
+            value: '0x1'
+          type: Dynamic
+        type: Values
+      type: String
+    PORT_GROUP_0_PIN_8_USED:
+      attributes:
+        id: PORT_GROUP_0_PIN_8_USED
+        label: PORT_GROUP_0_PIN_8_USED
+      children:
+      - children:
+        - attributes:
+            id: core
+            value: 'true'
+          type: Dynamic
+        type: Values
+      type: Boolean
+    PIN_33_PERIPHERAL_FUNCTION:
+      attributes:
+        id: PIN_33_PERIPHERAL_FUNCTION
+        label: Peripheral Selection
+      children:
+      - children:
+        - attributes:
+            value: H
+          type: User
+        type: Values
+      type: String
+    PIN_34_MODE:
+      attributes:
+        id: PIN_34_MODE
+        label: Mode
+      children:
+      - children:
+        - attributes:
+            value: ''
+          type: User
+        type: Values
+      type: String
+    PIN_34_FUNCTION_TYPE:
+      attributes:
+        id: PIN_34_FUNCTION_TYPE
+        label: Type
+      children:
+      - children:
+        - attributes:
+            value: QSPI_DATA1
+          type: User
+        type: Values
+      type: String
+    PORT_GROUP_0_PAD_9:
+      attributes:
+        id: PORT_GROUP_0_PAD_9
+        label: PORT_GROUP_0_PAD_9
+      children:
+      - children:
+        - attributes:
+            id: core
+            value: PA09
+          type: Dynamic
+        type: Values
+      type: String
+    PORT_GROUP_0_PINCFG9:
+      attributes:
+        id: PORT_GROUP_0_PINCFG9
+        label: PORT GROUP A PINCFG9
+      children:
+      - children:
+        - attributes:
+            id: core
+            value: '0x1'
+          type: Dynamic
+        type: Values
+      type: String
+    PORT_GROUP_0_PIN_9_USED:
+      attributes:
+        id: PORT_GROUP_0_PIN_9_USED
+        label: PORT_GROUP_0_PIN_9_USED
+      children:
+      - children:
+        - attributes:
+            id: core
+            value: 'true'
+          type: Dynamic
+        type: Values
+      type: Boolean
+    PIN_34_PERIPHERAL_FUNCTION:
+      attributes:
+        id: PIN_34_PERIPHERAL_FUNCTION
+        label: Peripheral Selection
+      children:
+      - children:
+        - attributes:
+            value: H
+          type: User
+        type: Values
+      type: String
+    PIN_35_MODE:
+      attributes:
+        id: PIN_35_MODE
+        label: Mode
+      children:
+      - children:
+        - attributes:
+            value: ''
+          type: User
+        type: Values
+      type: String
+    PIN_35_FUNCTION_TYPE:
+      attributes:
+        id: PIN_35_FUNCTION_TYPE
+        label: Type
+      children:
+      - children:
+        - attributes:
+            value: QSPI_DATA2
+          type: User
+        type: Values
+      type: String
+    PORT_GROUP_0_PMUX5:
+      attributes:
+        id: PORT_GROUP_0_PMUX5
+        label: PORT GROUP A PMUX5
+      children:
+      - children:
+        - attributes:
+            id: core
+            value: '0x77'
+          type: Dynamic
+        type: Values
+      type: String
+    PORT_GROUP_0_PAD_10:
+      attributes:
+        id: PORT_GROUP_0_PAD_10
+        label: PORT_GROUP_0_PAD_10
+      children:
+      - children:
+        - attributes:
+            id: core
+            value: PA10
+          type: Dynamic
+        type: Values
+      type: String
+    PORT_GROUP_0_PINCFG10:
+      attributes:
+        id: PORT_GROUP_0_PINCFG10
+        label: PORT GROUP A PINCFG10
+      children:
+      - children:
+        - attributes:
+            id: core
+            value: '0x1'
+          type: Dynamic
+        type: Values
+      type: String
+    PORT_GROUP_0_PIN_10_USED:
+      attributes:
+        id: PORT_GROUP_0_PIN_10_USED
+        label: PORT_GROUP_0_PIN_10_USED
+      children:
+      - children:
+        - attributes:
+            id: core
+            value: 'true'
+          type: Dynamic
+        type: Values
+      type: Boolean
+    PIN_35_PERIPHERAL_FUNCTION:
+      attributes:
+        id: PIN_35_PERIPHERAL_FUNCTION
+        label: Peripheral Selection
+      children:
+      - children:
+        - attributes:
+            value: H
+          type: User
+        type: Values
+      type: String
+    PIN_36_MODE:
+      attributes:
+        id: PIN_36_MODE
+        label: Mode
+      children:
+      - children:
+        - attributes:
+            value: ''
+          type: User
+        type: Values
+      type: String
+    PIN_36_FUNCTION_TYPE:
+      attributes:
+        id: PIN_36_FUNCTION_TYPE
+        label: Type
+      children:
+      - children:
+        - attributes:
+            value: QSPI_DATA3
+          type: User
+        type: Values
+      type: String
+    PORT_GROUP_0_PAD_11:
+      attributes:
+        id: PORT_GROUP_0_PAD_11
+        label: PORT_GROUP_0_PAD_11
+      children:
+      - children:
+        - attributes:
+            id: core
+            value: PA11
+          type: Dynamic
+        type: Values
+      type: String
+    PORT_GROUP_0_PINCFG11:
+      attributes:
+        id: PORT_GROUP_0_PINCFG11
+        label: PORT GROUP A PINCFG11
+      children:
+      - children:
+        - attributes:
+            id: core
+            value: '0x1'
+          type: Dynamic
+        type: Values
+      type: String
+    PORT_GROUP_0_PIN_11_USED:
+      attributes:
+        id: PORT_GROUP_0_PIN_11_USED
+        label: PORT_GROUP_0_PIN_11_USED
+      children:
+      - children:
+        - attributes:
+            id: core
+            value: 'true'
+          type: Dynamic
+        type: Values
+      type: Boolean
+    PIN_36_PERIPHERAL_FUNCTION:
+      attributes:
+        id: PIN_36_PERIPHERAL_FUNCTION
+        label: Peripheral Selection
+      children:
+      - children:
+        - attributes:
+            value: H
+          type: User
+        type: Values
+      type: String
+    PIN_33_FUNCTION_NAME:
+      attributes:
+        id: PIN_33_FUNCTION_NAME
+        label: Name
+      children:
+      - children:
+        - attributes:
+            value: QIO0
+          type: User
+        type: Values
+      type: String
+    PIN_34_FUNCTION_NAME:
+      attributes:
+        id: PIN_34_FUNCTION_NAME
+        label: Name
+      children:
+      - children:
+        - attributes:
+            value: QIO1
+          type: User
+        type: Values
+      type: String
+    PIN_35_FUNCTION_NAME:
+      attributes:
+        id: PIN_35_FUNCTION_NAME
+        label: Name
+      children:
+      - children:
+        - attributes:
+            value: QIO2
+          type: User
+        type: Values
+      type: String
+    PIN_36_FUNCTION_NAME:
+      attributes:
+        id: PIN_36_FUNCTION_NAME
+        label: Name
+      children:
+      - children:
+        - attributes:
+            value: QIO3
+          type: User
+        type: Values
+      type: String
+    PIN_39_MODE:
+      attributes:
+        id: PIN_39_MODE
+        label: Mode
+      children:
+      - children:
+        - attributes:
+            value: ''
+          type: User
+        type: Values
+      type: String
+    PIN_39_FUNCTION_TYPE:
+      attributes:
+        id: PIN_39_FUNCTION_TYPE
+        label: Type
+      children:
+      - children:
+        - attributes:
+            value: QSPI_SCK
+          type: User
+        type: Values
+      type: String
+    PORT_GROUP_1_PMUX5:
+      attributes:
+        id: PORT_GROUP_1_PMUX5
+        label: PORT GROUP B PMUX5
+      children:
+      - children:
+        - attributes:
+            id: core
+            value: '0x77'
+          type: Dynamic
+        type: Values
+      type: String
+    PORT_GROUP_1_PAD_10:
+      attributes:
+        id: PORT_GROUP_1_PAD_10
+        label: PORT_GROUP_1_PAD_10
+      children:
+      - children:
+        - attributes:
+            id: core
+            value: PB10
+          type: Dynamic
+        type: Values
+      type: String
+    PORT_GROUP_1_PINCFG10:
+      attributes:
+        id: PORT_GROUP_1_PINCFG10
+        label: PORT GROUP B PINCFG10
+      children:
+      - children:
+        - attributes:
+            id: core
+            value: '0x1'
+          type: Dynamic
+        type: Values
+      type: String
+    PORT_GROUP_1_PIN_10_USED:
+      attributes:
+        id: PORT_GROUP_1_PIN_10_USED
+        label: PORT_GROUP_1_PIN_10_USED
+      children:
+      - children:
+        - attributes:
+            id: core
+            value: 'true'
+          type: Dynamic
+        type: Values
+      type: Boolean
+    PIN_39_PERIPHERAL_FUNCTION:
+      attributes:
+        id: PIN_39_PERIPHERAL_FUNCTION
+        label: Peripheral Selection
+      children:
+      - children:
+        - attributes:
+            value: H
+          type: User
+        type: Values
+      type: String
+    PIN_40_FUNCTION_TYPE:
+      attributes:
+        id: PIN_40_FUNCTION_TYPE
+        label: Type
+      children:
+      - children:
+        - attributes:
+            value: QSPI_CS
+          type: User
+        type: Values
+      type: String
+    PIN_40_DIR:
+      attributes:
+        id: PIN_40_DIR
+        label: Direction
+      type: String
+    PIN_40_LAT:
+      attributes:
+        id: PIN_40_LAT
+        label: Initial Latch Value
+      type: String
+    PIN_40_MODE:
+      attributes:
+        id: PIN_40_MODE
+        label: Mode
+      children:
+      - children:
+        - attributes:
+            value: ''
+          type: User
+        type: Values
+      type: String
+    PORT_GROUP_1_PINCFG11:
+      attributes:
+        id: PORT_GROUP_1_PINCFG11
+        label: PORT GROUP B PINCFG11
+      children:
+      - children:
+        - attributes:
+            id: core
+            value: '0x1'
+          type: Dynamic
+        type: Values
+      type: String
+    PORT_GROUP_1_PIN_11_USED:
+      attributes:
+        id: PORT_GROUP_1_PIN_11_USED
+        label: PORT_GROUP_1_PIN_11_USED
+      children:
+      - children:
+        - attributes:
+            id: core
+            value: 'true'
+          type: Dynamic
+        type: Values
+      type: Boolean
+    PIN_40_PULLEN:
+      attributes:
+        id: PIN_40_PULLEN
+        label: Pull Enable
+      type: String
+    PIN_40_INEN:
+      attributes:
+        id: PIN_40_INEN
+        label: Input Enable
+      type: String
+    PORT_GROUP_1_PAD_11:
+      attributes:
+        id: PORT_GROUP_1_PAD_11
+        label: PORT_GROUP_1_PAD_11
+      children:
+      - children:
+        - attributes:
+            id: core
+            value: PB11
+          type: Dynamic
+        type: Values
+      type: String
+    PIN_40_PERIPHERAL_FUNCTION:
+      attributes:
+        id: PIN_40_PERIPHERAL_FUNCTION
+        label: Peripheral Selection
+      children:
+      - children:
+        - attributes:
+            value: H
+          type: User
+        type: Values
+      type: String
+    PIN_39_FUNCTION_NAME:
+      attributes:
+        id: PIN_39_FUNCTION_NAME
+        label: Name
+      children:
+      - children:
+        - attributes:
+            value: QSCK
+          type: User
+        type: Values
+      type: String
+    PIN_40_FUNCTION_NAME:
+      attributes:
+        id: PIN_40_FUNCTION_NAME
+        label: Name
+      children:
+      - children:
+        - attributes:
+            value: QCS
+          type: User
+        type: Values
+      type: String
+    MCLK_APBC_INITIAL_VALUE:
+      attributes:
+        id: MCLK_APBC_INITIAL_VALUE
+        label: MCLK_APBC_INITIAL_VALUE
+      children:
+      - children:
+        - attributes:
+            id: core
+            value: '0x2000'
+          type: Dynamic
+        type: Values
+      type: String
+    QSPI_CLOCK_ENABLE:
+      attributes:
+        id: QSPI_CLOCK_ENABLE
+        label: QSPI Clock Enable
+      children:
+      - children:
+        - attributes:
+            id: qspi
+            value: 'true'
+          type: Dynamic
+        type: Values
+      type: Boolean
   userData:
     children:
     - attributes:

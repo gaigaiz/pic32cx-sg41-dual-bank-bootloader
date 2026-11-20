@@ -77,6 +77,30 @@
 #define SW1_Get()               (((PORT_REGS->GROUP[3].PORT_IN >> 0U)) & 0x01U)
 #define SW1_PIN                  PORT_PIN_PD00
 
+/*** Macros for QIO0 pin ***/
+#define QIO0_Get()               (((PORT_REGS->GROUP[0].PORT_IN >> 8U)) & 0x01U)
+#define QIO0_PIN                  PORT_PIN_PA08
+
+/*** Macros for QIO1 pin ***/
+#define QIO1_Get()               (((PORT_REGS->GROUP[0].PORT_IN >> 9U)) & 0x01U)
+#define QIO1_PIN                  PORT_PIN_PA09
+
+/*** Macros for QIO2 pin ***/
+#define QIO2_Get()               (((PORT_REGS->GROUP[0].PORT_IN >> 10U)) & 0x01U)
+#define QIO2_PIN                  PORT_PIN_PA10
+
+/*** Macros for QIO3 pin ***/
+#define QIO3_Get()               (((PORT_REGS->GROUP[0].PORT_IN >> 11U)) & 0x01U)
+#define QIO3_PIN                  PORT_PIN_PA11
+
+/*** Macros for QSCK pin ***/
+#define QSCK_Get()               (((PORT_REGS->GROUP[1].PORT_IN >> 10U)) & 0x01U)
+#define QSCK_PIN                  PORT_PIN_PB10
+
+/*** Macros for QCS pin ***/
+#define QCS_Get()               (((PORT_REGS->GROUP[1].PORT_IN >> 11U)) & 0x01U)
+#define QCS_PIN                  PORT_PIN_PB11
+
 /*** Macros for TX pin ***/
 #define TX_Get()               (((PORT_REGS->GROUP[1].PORT_IN >> 12U)) & 0x01U)
 #define TX_PIN                  PORT_PIN_PB12

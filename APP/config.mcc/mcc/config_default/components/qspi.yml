@@ -1,0 +1,170 @@
+configVersion: 1.0.0
+componentName: qspi
+coreVersion: 5.9.2
+device: PIC32CX1025SG41128
+library: []
+dependency:
+- dependencyPackage: class com.microchip.mcc.harmony.HarmonyModule
+  name: qspi
+  type: module
+  version: ''
+- dependencyPackage: ''
+  name: csp
+  type: package
+  version: v3.26.1
+customDataClassName: com.microchip.utils_mh3.utils.persistence.CustomModuleData
+data:
+  attachments: {}
+  elementPosition: {}
+  symbols:
+    QSPI_BAUD_RATE:
+      attributes:
+        id: QSPI_BAUD_RATE
+        label: QSPI_BAUD_RATE
+      children:
+      - children:
+        - attributes:
+            value: '6000000'
+          type: User
+        type: Values
+      type: Integer
+    QSPI_CPHA:
+      attributes:
+        id: QSPI_CPHA
+        label: Clock Phase
+      type: KeyValueSet
+    QSPI_CPOL:
+      attributes:
+        id: QSPI_CPOL
+        label: Clock Polarity
+      children:
+      - children:
+        - attributes:
+            id: qspi
+            value: '0'
+          type: Dynamic
+        type: Values
+      type: KeyValueSet
+    QSPI_CSMODE:
+      attributes:
+        id: QSPI_CSMODE
+        label: Chip Select Mode
+      type: Combo
+    QSPI_DATALEN:
+      attributes:
+        id: QSPI_DATALEN
+        label: Data Length
+      type: KeyValueSet
+    QSPI_INSTANCE_NAME:
+      attributes:
+        id: QSPI_INSTANCE_NAME
+        label: QSPI_INSTANCE_NAME
+      type: String
+    QSPI_LOOPEN:
+      attributes:
+        id: QSPI_LOOPEN
+        label: Local Loopback Enable
+      type: KeyValueSet
+    QSPI_SCBR:
+      attributes:
+        id: QSPI_SCBR
+        label: QSPI_SCBR
+      children:
+      - children:
+        - attributes:
+            id: qspi
+            value: '1'
+          type: Dynamic
+        type: Values
+      type: Integer
+    QSPI_SMM:
+      attributes:
+        id: QSPI_SMM
+        label: Operating Mode
+      type: KeyValueSet
+    RECEIVE_DATA_REGISTER:
+      attributes:
+        id: RECEIVE_DATA_REGISTER
+        label: RECEIVE_DATA_REGISTER
+      type: String
+    SPI_CHARSIZE_BITS_10_BIT_MASK:
+      attributes:
+        id: SPI_CHARSIZE_BITS_10_BIT_MASK
+        label: SPI_CHARSIZE_BITS_10_BIT_MASK
+      type: String
+    SPI_CHARSIZE_BITS_11_BIT_MASK:
+      attributes:
+        id: SPI_CHARSIZE_BITS_11_BIT_MASK
+        label: SPI_CHARSIZE_BITS_11_BIT_MASK
+      type: String
+    SPI_CHARSIZE_BITS_12_BIT_MASK:
+      attributes:
+        id: SPI_CHARSIZE_BITS_12_BIT_MASK
+        label: SPI_CHARSIZE_BITS_12_BIT_MASK
+      type: String
+    SPI_CHARSIZE_BITS_13_BIT_MASK:
+      attributes:
+        id: SPI_CHARSIZE_BITS_13_BIT_MASK
+        label: SPI_CHARSIZE_BITS_13_BIT_MASK
+      type: String
+    SPI_CHARSIZE_BITS_14_BIT_MASK:
+      attributes:
+        id: SPI_CHARSIZE_BITS_14_BIT_MASK
+        label: SPI_CHARSIZE_BITS_14_BIT_MASK
+      type: String
+    SPI_CHARSIZE_BITS_15_BIT_MASK:
+      attributes:
+        id: SPI_CHARSIZE_BITS_15_BIT_MASK
+        label: SPI_CHARSIZE_BITS_15_BIT_MASK
+      type: String
+    SPI_CHARSIZE_BITS_16_BIT_MASK:
+      attributes:
+        id: SPI_CHARSIZE_BITS_16_BIT_MASK
+        label: SPI_CHARSIZE_BITS_16_BIT_MASK
+      type: String
+    SPI_CHARSIZE_BITS_8_BIT_MASK:
+      attributes:
+        id: SPI_CHARSIZE_BITS_8_BIT_MASK
+        label: SPI_CHARSIZE_BITS_8_BIT_MASK
+      type: String
+    SPI_CHARSIZE_BITS_9_BIT_MASK:
+      attributes:
+        id: SPI_CHARSIZE_BITS_9_BIT_MASK
+        label: SPI_CHARSIZE_BITS_9_BIT_MASK
+      type: String
+    SPI_CLOCK_PHASE_LEADING_MASK:
+      attributes:
+        id: SPI_CLOCK_PHASE_LEADING_MASK
+        label: SPI_CLOCK_PHASE_LEADING_MASK
+      type: String
+    SPI_CLOCK_PHASE_TRAILING_MASK:
+      attributes:
+        id: SPI_CLOCK_PHASE_TRAILING_MASK
+        label: SPI_CLOCK_PHASE_TRAILING_MASK
+      type: String
+    SPI_CLOCK_POLARITY_HIGH_MASK:
+      attributes:
+        id: SPI_CLOCK_POLARITY_HIGH_MASK
+        label: SPI_CLOCK_POLARITY_HIGH_MASK
+      type: String
+    SPI_CLOCK_POLARITY_LOW_MASK:
+      attributes:
+        id: SPI_CLOCK_POLARITY_LOW_MASK
+        label: SPI_CLOCK_POLARITY_LOW_MASK
+      type: String
+    SPI_DUMMY_DATA:
+      attributes:
+        id: SPI_DUMMY_DATA
+        label: Dummy Data
+      type: Hex
+    SPI_PLIB_API_PREFIX:
+      attributes:
+        id: SPI_PLIB_API_PREFIX
+        label: SPI_PLIB_API_PREFIX
+      type: String
+    TRANSMIT_DATA_REGISTER:
+      attributes:
+        id: TRANSMIT_DATA_REGISTER
+        label: TRANSMIT_DATA_REGISTER
+      type: String
+  userData: {}

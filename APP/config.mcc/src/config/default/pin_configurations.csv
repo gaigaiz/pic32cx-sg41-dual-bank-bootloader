@@ -23,12 +23,12 @@ Pin Number,Pin ID,Custom Name,Function,Mode, Direction,Latch,Pull Up,Pull Down,D
 28,PC05,,Available,,,,,,NORMAL
 29,PC06,,Available,,,,,,NORMAL
 30,PC07,,Available,,,,,,NORMAL
-33,PA08,,Available,,,,,,NORMAL
-34,PA09,,Available,,,,,,NORMAL
-35,PA10,,Available,,,,,,NORMAL
-36,PA11,,Available,,,,,,NORMAL
-39,PB10,,Available,,,,,,NORMAL
-40,PB11,,Available,,,,,,NORMAL
+33,PA08,QIO0,QSPI_DATA0,Digital,High Impedance,n/a,No,No,NORMAL
+34,PA09,QIO1,QSPI_DATA1,Digital,High Impedance,n/a,No,No,NORMAL
+35,PA10,QIO2,QSPI_DATA2,Digital,High Impedance,n/a,No,No,NORMAL
+36,PA11,QIO3,QSPI_DATA3,Digital,High Impedance,n/a,No,No,NORMAL
+39,PB10,QSCK,QSPI_SCK,Digital,High Impedance,n/a,No,No,NORMAL
+40,PB11,QCS,QSPI_CS,Digital,High Impedance,n/a,No,No,NORMAL
 41,PB12,TX,SERCOM4_PAD0,Digital,High Impedance,n/a,No,No,NORMAL
 42,PB13,RX,SERCOM4_PAD1,Digital,High Impedance,n/a,No,No,NORMAL
 43,PB14,,Available,,,,,,NORMAL

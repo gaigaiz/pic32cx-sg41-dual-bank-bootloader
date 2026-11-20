@@ -139,6 +139,8 @@ void SYS_Initialize ( void* data )
 
 
 
+    QSPI_Initialize();
+
     EVSYS_Initialize();
 
     SERCOM4_USART_Initialize();
