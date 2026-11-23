@@ -27,6 +27,7 @@
 #include <stdlib.h>                     // Defines EXIT_FAILURE
 #include <stdint.h>
 #include <stdio.h>                      // snprintf for temperature report
+#include <string.h>                     // strcmp for serial command parsing
 #include "definitions.h"                // SYS function prototypes
 #include "core_cm4.h"                   // DWT cycle counter and NVIC_SystemReset
 
@@ -281,20 +282,14 @@ static bool MCP9804_ReadTempC100(int32_t *tempC100)
     return true;
 }
 
-static void MCP9804_ReportTemperature(void)
+/* Prints one already-read temperature in hundredths of a degree Celsius. */
+static void MCP9804_PrintTempC100(int32_t t100)
 {
-    int32_t t100;
     char sign;
     int32_t absT;
     int32_t whole;
     int32_t frac;
     char line[24];
-
-    if (!MCP9804_ReadTempC100(&t100))
-    {
-        Uart_WriteStr("Temp: I2C ERR\r\n");
-        return;
-    }
 
     if (t100 < 0)
     {
@@ -312,6 +307,241 @@ static void MCP9804_ReportTemperature(void)
     (void)snprintf(line, sizeof(line), "Temp: %c%ld.%02ld C\r\n",
                    sign, (long)whole, (long)frac);
     Uart_WriteStr(line);
+}
+
+/* -------------------------------------------------------------------------- */
+/* Session record list (RAM ring buffer): commands + temperature samples.      */
+/* This lives in RAM only and is cleared on reset; persistent external-flash   */
+/* storage is a later option.                                                 */
+/* -------------------------------------------------------------------------- */
+#define RECORD_CAPACITY             256U
+#define RECORD_CMD_LEN              24U
+
+typedef enum
+{
+    REC_TYPE_CMD = 0,
+    REC_TYPE_TEMP
+} RECORD_TYPE;
+
+typedef struct
+{
+    RECORD_TYPE type;
+    uint32_t    uptimeSec;
+    int32_t     tempC100;
+    char        cmd[RECORD_CMD_LEN];
+} record_entry_t;
+
+static record_entry_t recordBuf[RECORD_CAPACITY];
+static uint32_t       recordHead   = 0U;   /* next write index            */
+static uint32_t       recordCount = 0U;   /* valid entries, <= capacity   */
+
+/* Session / reporting state. */
+static bool recording    = false;
+static bool tempReportOn = true;           /* keep existing default: report on boot */
+static uint32_t uptimeSec = 0U;           /* seconds since reset, no RTC */
+
+static void Record_Clear(void)
+{
+    recordHead   = 0U;
+    recordCount  = 0U;
+}
+
+static void Record_AddCmd(const char *cmd)
+{
+    record_entry_t *e = &recordBuf[recordHead];
+
+    e->type      = REC_TYPE_CMD;
+    e->uptimeSec = uptimeSec;
+    e->tempC100  = 0;
+    (void)snprintf(e->cmd, sizeof(e->cmd), "%s", cmd);
+
+    recordHead = (recordHead + 1U) % RECORD_CAPACITY;
+    if (recordCount < RECORD_CAPACITY)
+    {
+        recordCount++;
+    }
+}
+
+static void Record_AddTemp(int32_t tempC100)
+{
+    record_entry_t *e = &recordBuf[recordHead];
+
+    e->type      = REC_TYPE_TEMP;
+    e->uptimeSec = uptimeSec;
+    e->tempC100  = tempC100;
+    e->cmd[0]    = '\0';
+
+    recordHead = (recordHead + 1U) % RECORD_CAPACITY;
+    if (recordCount < RECORD_CAPACITY)
+    {
+        recordCount++;
+    }
+}
+
+static void Record_Echo(void)
+{
+    char line[40];
+    uint32_t i;
+    uint32_t start;
+    int32_t  t100;
+    char     sign;
+    int32_t  absT;
+    int32_t  whole;
+    int32_t  frac;
+
+    if (recordCount == 0U)
+    {
+        Uart_WriteStr("No record.\r\n");
+        return;
+    }
+
+    (void)snprintf(line, sizeof(line), "--- Record list (%lu entries) ---\r\n",
+                   (unsigned long)recordCount);
+    Uart_WriteStr(line);
+
+    /* When full, the oldest entry sits at recordHead; otherwise at index 0. */
+    start = (recordCount < RECORD_CAPACITY) ? 0U : recordHead;
+
+    for (i = 0U; i < recordCount; i++)
+    {
+        const record_entry_t *e = &recordBuf[(start + i) % RECORD_CAPACITY];
+
+        if (e->type == REC_TYPE_CMD)
+        {
+            (void)snprintf(line, sizeof(line), "[%03lu] %05lus CMD : %s\r\n",
+                           (unsigned long)(i + 1U), (unsigned long)e->uptimeSec, e->cmd);
+        }
+        else
+        {
+            t100  = e->tempC100;
+            if (t100 < 0)
+            {
+                sign  = '-';
+                absT  = -t100;
+            }
+            else
+            {
+                sign  = '+';
+                absT  = t100;
+            }
+            whole = absT / 100;
+            frac  = absT % 100;
+
+            (void)snprintf(line, sizeof(line), "[%03lu] %05lus TEMP: %c%ld.%02ld C\r\n",
+                           (unsigned long)(i + 1U), (unsigned long)e->uptimeSec,
+                           sign, (long)whole, (long)frac);
+        }
+        Uart_WriteStr(line);
+    }
+
+    Uart_WriteStr("--- End ---\r\n");
+}
+
+/* -------------------------------------------------------------------------- */
+/* Serial command line over SERCOM4. Commands are text lines ended by CR/LF.  */
+/* -------------------------------------------------------------------------- */
+#define CMD_LINE_LEN                32U
+
+static char    cmdLine[CMD_LINE_LEN];
+static uint8_t cmdLen = 0U;
+
+static void Command_Handle(const char *line)
+{
+    if (strcmp(line, "Start recording") == 0)
+    {
+        if (recording)
+        {
+            Uart_WriteStr("The same command does not need to be executed again.\r\n");
+            return;
+        }
+
+        Record_Clear();
+        recording = true;
+        Record_AddCmd("Start recording");
+        Uart_WriteStr("Recording started.\r\n");
+    }
+    else if (strcmp(line, "End recording") == 0)
+    {
+        if (!recording)
+        {
+            Uart_WriteStr("The same command does not need to be executed again.\r\n");
+            return;
+        }
+
+        Record_AddCmd("End recording");
+        recording = false;
+        Uart_WriteStr("Recording stopped.\r\n");
+    }
+    else if (strcmp(line, "Echo record") == 0)
+    {
+        Record_Echo();
+    }
+    else if (strcmp(line, "Tem Get") == 0)
+    {
+        if (tempReportOn)
+        {
+            Uart_WriteStr("The same command does not need to be executed again.\r\n");
+            return;
+        }
+
+        tempReportOn = true;
+        if (recording)
+        {
+            Record_AddCmd("Tem Get");
+        }
+        Uart_WriteStr("Temperature reporting on.\r\n");
+    }
+    else if (strcmp(line, "Tem End") == 0)
+    {
+        if (!tempReportOn)
+        {
+            Uart_WriteStr("The same command does not need to be executed again.\r\n");
+            return;
+        }
+
+        tempReportOn = false;
+        if (recording)
+        {
+            Record_AddCmd("Tem End");
+        }
+        Uart_WriteStr("Temperature reporting off.\r\n");
+    }
+    else
+    {
+        Uart_WriteStr("Unknown command.\r\n");
+    }
+}
+
+/* Poll the RX line; assemble one line and dispatch on CR/LF. */
+static void Uart_CommandPoll(void)
+{
+    uint8_t byte;
+
+    if ((SERCOM4_REGS->USART_INT.SERCOM_INTFLAG & SERCOM_USART_INT_INTFLAG_RXC_Msk) == 0U)
+    {
+        return;
+    }
+
+    byte = (uint8_t)SERCOM4_REGS->USART_INT.SERCOM_DATA;
+
+    if ((byte == '\r') || (byte == '\n'))
+    {
+        if (cmdLen > 0U)
+        {
+            cmdLine[cmdLen] = '\0';
+            Command_Handle(cmdLine);
+            cmdLen = 0U;
+        }
+    }
+    else if ((byte >= 0x20U) && (byte <= 0x7EU))
+    {
+        if (cmdLen < (CMD_LINE_LEN - 1U))
+        {
+            cmdLine[cmdLen] = (char)byte;
+            cmdLen++;
+        }
+    }
+    /* Other control characters are ignored. */
 }
 
 /* -------------------------------------------------------------------------- */
@@ -720,7 +950,7 @@ int main ( void )
     /* Write success marker: clear retry_cnt and bankswapped in the state sector. */
     App_FailSafeMarkStarted();
 
-    static uint32_t lastTempAt = 0U;
+    static uint32_t lastTickAt = 0U;
 
     while ( true )
     {
@@ -728,12 +958,37 @@ int main ( void )
 
         SW1_KeyTasks();
 
-        /* Report on-board MCP9804 temperature once per second. */
+        /* Poll serial commands on SERCOM4. */
+        Uart_CommandPoll();
+
+        /* One-second tick: uptime stamp, optional temperature report and record. */
         uint32_t now = DWT->CYCCNT;
-        if ((now - lastTempAt) >= TEMP_REPORT_PERIOD_CYCLES)
+        if ((now - lastTickAt) >= TEMP_REPORT_PERIOD_CYCLES)
         {
-            lastTempAt = now;
-            MCP9804_ReportTemperature();
+            int32_t t100;
+            bool    tOk;
+
+            lastTickAt = now;
+            uptimeSec++;
+
+            tOk = MCP9804_ReadTempC100(&t100);
+
+            if (tempReportOn)
+            {
+                if (tOk)
+                {
+                    MCP9804_PrintTempC100(t100);
+                }
+                else
+                {
+                    Uart_WriteStr("Temp: I2C ERR\r\n");
+                }
+            }
+
+            if (recording && tOk)
+            {
+                Record_AddTemp(t100);
+            }
         }
 
         /* Maintain state machines of all polled MPLAB Harmony modules. */
