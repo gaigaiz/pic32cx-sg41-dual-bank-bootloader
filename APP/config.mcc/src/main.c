@@ -331,9 +331,26 @@ typedef struct
     char        cmd[RECORD_CMD_LEN];
 } record_entry_t;
 
+/* Persistent record area in the external QSPI flash. Sector 0 (0x000000) is
+ * used by the bring-up self-test; records start at 0x001000 and span 3 sectors. */
+#define RECORD_FLASH_ADDR           0x001000UL
+#define RECORD_FLASH_SECTOR_SIZE    4096U
+#define RECORD_FLASH_SECTORS        3U
+#define RECORD_MAGIC                0x52454331UL  /* "REC1" */
+
+typedef struct
+{
+    uint32_t magic;
+    uint32_t count;
+    uint32_t reserved[2];
+} record_header_t;
+
 static record_entry_t recordBuf[RECORD_CAPACITY];
 static uint32_t       recordHead   = 0U;   /* next write index            */
 static uint32_t       recordCount = 0U;   /* valid entries, <= capacity   */
+
+static bool Record_SaveToFlash(void);
+static void Record_LoadFromFlash(void);
 
 /* Session / reporting state. */
 static bool recording    = false;
@@ -470,7 +487,15 @@ static void Command_Handle(const char *line)
 
         Record_AddCmd("End recording");
         recording = false;
-        Uart_WriteStr("Recording stopped.\r\n");
+
+        if (Record_SaveToFlash())
+        {
+            Uart_WriteStr("Recording stopped. Saved to flash.\r\n");
+        }
+        else
+        {
+            Uart_WriteStr("Recording stopped. Flash save fail.\r\n");
+        }
     }
     else if (strcmp(line, "Echo record") == 0)
     {
@@ -720,6 +745,123 @@ static bool QSPI_FlashRead(uint32_t addr, uint8_t *buf, uint32_t len)
     return QSPI_MemoryRead(&xfer, (uint32_t *)buf, len, addr);
 }
 
+/* Write a byte buffer across page boundaries; a NOR page program cannot cross
+ * a 256-byte page in one command. */
+static bool Record_FlashWriteBuffer(uint32_t addr, const uint8_t *src, uint32_t len)
+{
+    while (len > 0U)
+    {
+        uint32_t pageOff = addr % QSPI_FLASH_PAGE_SIZE;
+        uint32_t chunk   = QSPI_FLASH_PAGE_SIZE - pageOff;
+
+        if (chunk > len)
+        {
+            chunk = len;
+        }
+
+        if (!QSPI_FlashPageProgram(addr, src, chunk))
+        {
+            return false;
+        }
+
+        addr += chunk;
+        src  += chunk;
+        len  -= chunk;
+    }
+
+    return true;
+}
+
+/* Persist the current RAM list to flash: erase the record area, write the
+ * header, then entries oldest-to-newest. Overwrites any previous saved session. */
+static bool Record_SaveToFlash(void)
+{
+    static uint32_t        hdrBuf[sizeof(record_header_t) / 4U];
+    record_header_t       *hdr = (record_header_t *)hdrBuf;
+    uint32_t sector;
+    uint32_t start;
+    uint32_t i;
+    uint32_t entryAddr;
+
+    for (sector = 0U; sector < RECORD_FLASH_SECTORS; sector++)
+    {
+        if (!QSPI_FlashSectorErase(RECORD_FLASH_ADDR + sector * RECORD_FLASH_SECTOR_SIZE))
+        {
+            return false;
+        }
+    }
+
+    hdr->magic       = RECORD_MAGIC;
+    hdr->count       = recordCount;
+    hdr->reserved[0] = 0U;
+    hdr->reserved[1] = 0U;
+
+    if (!Record_FlashWriteBuffer(RECORD_FLASH_ADDR, (const uint8_t *)hdrBuf,
+                                 sizeof(record_header_t)))
+    {
+        return false;
+    }
+
+    if (recordCount == 0U)
+    {
+        return true;
+    }
+
+    start     = (recordCount < RECORD_CAPACITY) ? 0U : recordHead;
+    entryAddr = RECORD_FLASH_ADDR + sizeof(record_header_t);
+
+    for (i = 0U; i < recordCount; i++)
+    {
+        const record_entry_t *e = &recordBuf[(start + i) % RECORD_CAPACITY];
+
+        if (!Record_FlashWriteBuffer(entryAddr, (const uint8_t *)e,
+                                     sizeof(record_entry_t)))
+        {
+            return false;
+        }
+        entryAddr += sizeof(record_entry_t);
+    }
+
+    return true;
+}
+
+/* Reload a previously saved list from flash into RAM on boot. Leaves RAM
+ * empty when there is no valid record area. */
+static void Record_LoadFromFlash(void)
+{
+    record_header_t hdr;
+
+    recordHead  = 0U;
+    recordCount = 0U;
+
+    if (!QSPI_FlashRead(RECORD_FLASH_ADDR, (uint8_t *)&hdr, sizeof(record_header_t)))
+    {
+        return;
+    }
+
+    if ((hdr.magic != RECORD_MAGIC) || (hdr.count > RECORD_CAPACITY))
+    {
+        return;
+    }
+
+    if (hdr.count == 0U)
+    {
+        return;
+    }
+
+    if (!QSPI_FlashRead(RECORD_FLASH_ADDR + sizeof(record_header_t),
+                        (uint8_t *)recordBuf,
+                        hdr.count * sizeof(record_entry_t)))
+    {
+        recordHead  = 0U;
+        recordCount = 0U;
+        return;
+    }
+
+    recordCount = hdr.count;
+    recordHead  = hdr.count % RECORD_CAPACITY;
+}
+
 /* Bring-up check: read JEDEC ID, unlock block protection, erase the first
  * sector, write 16 test bytes, read back and compare. This erases/programs
  * that sector on every boot; once the link is proven, it can be reduced to an
@@ -936,6 +1078,9 @@ int main ( void )
 
     /* QSPI serial flash (SST26VF064BA, U700): probe ID and 16-byte loopback. */
     QSPI_FlashSelfTest();
+
+    /* Reload any record list saved in the external flash from a prior session. */
+    Record_LoadFromFlash();
 
     /* ---- WDT: hand it over from BL to APP ---- */
     WDT_TimeoutPeriodSet(WDT_TIMEOUT_2S);
