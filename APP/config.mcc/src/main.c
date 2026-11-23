@@ -337,7 +337,7 @@ static uint32_t       recordCount = 0U;   /* valid entries, <= capacity   */
 
 /* Session / reporting state. */
 static bool recording    = false;
-static bool tempReportOn = true;           /* keep existing default: report on boot */
+static bool tempReportOn = false;          /* off after reset; enable with Tem Get */
 static uint32_t uptimeSec = 0U;           /* seconds since reset, no RTC */
 
 static void Record_Clear(void)
@@ -965,16 +965,19 @@ int main ( void )
         uint32_t now = DWT->CYCCNT;
         if ((now - lastTickAt) >= TEMP_REPORT_PERIOD_CYCLES)
         {
-            int32_t t100;
-            bool    tOk;
+            int32_t t100 = 0;
+            bool    tOk  = false;
 
             lastTickAt = now;
             uptimeSec++;
 
-            tOk = MCP9804_ReadTempC100(&t100);
-
+            /* Read the sensor only while reporting is enabled; temperature
+             * entries are recorded for the same enabled window, so Tem End
+             * stops both printing and recording temperature. */
             if (tempReportOn)
             {
+                tOk = MCP9804_ReadTempC100(&t100);
+
                 if (tOk)
                 {
                     MCP9804_PrintTempC100(t100);
@@ -983,11 +986,11 @@ int main ( void )
                 {
                     Uart_WriteStr("Temp: I2C ERR\r\n");
                 }
-            }
 
-            if (recording && tOk)
-            {
-                Record_AddTemp(t100);
+                if (recording && tOk)
+                {
+                    Record_AddTemp(t100);
+                }
             }
         }
 
