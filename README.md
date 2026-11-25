@@ -146,22 +146,31 @@ The check passes when the script prints `ALL CHECKS PASSED`.
 
 `btl_host.py` accepts **raw binary only** (it does not parse Intel HEX).
 
-APP-only OTA to the inactive bank:
-
-```
-python Tools/btl_host.py -v -s -i COM3 -d PIC32CX_SG41 -a 0x82000 -f BL/out/BL/app.bin
-```
-
-Program a blank inactive bank with both BL and APP (merged image):
+**Scenario 1: Program a blank inactive bank with both BL and APP (merged image)**
 
 ```
 python Tools/btl_host.py -v -s -i COM3 -d PIC32CX_SG41 -a 0x80000 -f BL/out/BL/merged_bl_app.bin
 ```
 
-- `-a 0x82000` = inactive bank APP area (always points to the inactive bank).
+**Scenario 2: APP-only OTA to the inactive bank, swap after programming**
+
+```
+python Tools/btl_host.py -v -s -i COM3 -d PIC32CX_SG41 -a 0x82000 -f BL/out/BL/app.bin
+```
+
+**Scenario 3: Update only the active bank's APP, no bank swap (blank first flash or debug direct flash to slot A)**
+
+When the board only has BL_A, flash APP_A straight into the active bank's own APP slot. Do not pass `-s`; the script does a plain reset and keeps the bank:
+
+```
+python Tools/btl_host.py -v -i COM3 -d PIC32CX_SG41 -a 0x2000 -f BL/out/BL/app.bin
+```
+
 - `-a 0x80000` = inactive bank BL base, for the merged BL+APP image.
+- `-a 0x82000` = inactive bank APP area (always points to the inactive bank).
+- `-a 0x2000` = the active bank's own APP slot; used for blank first flash or debug direct flash to slot A, no swap.
 - `-s` = send `0xA4` BankSwap Reset after CRC passes; without it the script sends
-  a plain `0xA3` reset.
+  a plain `0xA3` reset. Do not pass `-s` in scenario 3.
 
 ### 6.3 Serial protocol
 

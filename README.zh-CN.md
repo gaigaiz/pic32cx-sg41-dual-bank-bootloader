@@ -138,21 +138,30 @@ python Tools/verify_merged_bin.py
 
 `btl_host.py` 只接收 **raw binary**（不解析 Intel HEX）。
 
-只升级 APP，写入非活动 Bank：
-
-```
-python Tools/btl_host.py -v -s -i COM3 -d PIC32CX_SG41 -a 0x82000 -f BL/out/BL/app.bin
-```
-
-向空白的非活动 Bank 烧录 BL + APP 合并镜像：
+**场景 1：向空白的非活动 Bank 烧录 BL + APP 合并镜像**
 
 ```
 python Tools/btl_host.py -v -s -i COM3 -d PIC32CX_SG41 -a 0x80000 -f BL/out/BL/merged_bl_app.bin
 ```
 
-- `-a 0x82000` = 非活动 Bank 的 APP 区（始终指向非活动 Bank）。
+**场景 2：只升级 APP，写入非活动 Bank，写完切换**
+
+```
+python Tools/btl_host.py -v -s -i COM3 -d PIC32CX_SG41 -a 0x82000 -f BL/out/BL/app.bin
+```
+
+**场景 3：只更新当前活动 Bank 的 APP，不切换 Bank（空片首刷或调试直刷 A 槽）**
+
+板子上只有 BL_A 时，把 APP_A 直刷到活动 Bank 自己的 APP 槽，不带 `-s`，写完普通复位、不交换 Bank：
+
+```
+python Tools/btl_host.py -v -i COM3 -d PIC32CX_SG41 -a 0x2000 -f BL/out/BL/app.bin
+```
+
 - `-a 0x80000` = 非活动 Bank 的 BL 起点，用于 BL+APP 合并镜像。
-- `-s` = CRC 通过后发送 `0xA4` BankSwap 复位；不加该参数则发送普通的 `0xA3` 复位。
+- `-a 0x82000` = 非活动 Bank 的 APP 区（始终指向非活动 Bank）。
+- `-a 0x2000` = 当前活动 Bank 自己的 APP 槽；空片首刷或调试直刷 A 槽使用，不切换 Bank。
+- `-s` = CRC 通过后发送 `0xA4` BankSwap 复位；不加该参数则发送普通的 `0xA3` 复位。场景 3 不要带 `-s`。
 
 ### 6.3 串口协议
 

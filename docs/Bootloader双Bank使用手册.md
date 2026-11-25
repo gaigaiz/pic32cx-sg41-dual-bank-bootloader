@@ -299,7 +299,7 @@ python -m pip install pyserial
 
 如果这两个地址仍是 `FF FF FF FF`，说明 BL 没有烧进去，不要继续下载 APP。
 
-### 7.3 回到 BL，用合并镜像补齐 Bank B
+### 7.3 场景 1：回到 BL，用合并镜像补齐 Bank B
 
 1. 在运行的 APP 中长按 SW1 满 3 秒后抬起，进入升级模式（触发机制见第 9 章）。
 2. 串口先发送 READ_VERSION，收到 `50 03 07` 确认 BL 在升级模式。
@@ -324,7 +324,7 @@ python Tools\btl_host.py -v -s -i COM3 -d PIC32CX_SG41 -a 0x80000 -f BL\out\BL\m
 
 ## 8. 日常 APP 升级（双 Bank OTA）
 
-### 8.1 标准流程
+### 8.1 场景 2：写入不活动 Bank 的 APP，Swap 后启动
 
 前提：两个 Bank 都已有有效 BL，当前运行在某个活动 Bank 的 APP 上。
 
@@ -364,15 +364,16 @@ python Tools\btl_host.py -v -s -i COM3 -d PIC32CX_SG41 -a 0x82000 -f BL\out\BL\a
 3. 当前活动 B：再次 `0x82000 -s`，此时不活动是 Bank A，写入 APP_A，Swap 回 A，验证 APP_A 正常。
 4. 调试器核对物理 `0x2000` 与 `0x82000` 向量头一致，两侧版本相同。
 
-### 8.3 活动 Bank 本地更新（不带 Swap）
+### 8.3 场景 3：活动 Bank 本地更新（不带 Swap，空片首刷 / 调试直刷 A 槽）
 
-只有工厂空片首次写活动 Bank APP、或只更新活动 Bank 元数据时才使用 `0x2000`，且**不要带 `-s`**：
+板子上只有 BL_A 时，只更新当前活动 Bank 自己的 APP 槽，不切换 Bank。适用于工厂空片首次写活动 Bank APP、或调试时直刷 A 槽。地址用 `0x2000`，且**不要带 `-s`**：
 
 ```
 python Tools\btl_host.py -v -i COM3 -d PIC32CX_SG41 -a 0x2000 -f BL\out\BL\app.bin
 ```
 
 - 不带 `-s` 时脚本最后发送 `0xA3` 普通复位，不交换 Bank；
+- `-a 0x2000` 指向当前活动 Bank 自己的 APP 槽（活动 A → APP_A；活动 B → APP_B）；
 - 双 Bank 日常升级禁止使用 `0x2000` 搭配 `-s`：那会把新固件写进正在运行的活动 Bank 自身，Swap 后启动对面旧固件，表现为现象回退。
 
 ### 8.4 命令参数说明（`btl_host.py`）
@@ -382,7 +383,7 @@ python Tools\btl_host.py -v -i COM3 -d PIC32CX_SG41 -a 0x2000 -f BL\out\BL\app.b
 | `-v` | 打印详细过程 |
 | `-i COM3` | 串口号，按实际替换 |
 | `-d PIC32CX_SG41` | 设备型号（必须与设备表一致） |
-| `-a 0x82000` | 目标起始地址，原样透传给 BL 的 UNLOCK / DATA |
+| `-a <addr>` | 目标起始地址，原样透传给 BL 的 UNLOCK / DATA。`0x80000` = 非活动 Bank BL 起点；`0x82000` = 非活动 Bank APP 区；`0x2000` = 当前活动 Bank 自己的 APP 槽（场景 3，不带 `-s`） |
 | `-f <file>` | raw binary 文件路径，不支持 HEX |
 | `-s` | CRC 通过后发 `0xA4` Bank Swap Reset；不加则发 `0xA3` 普通复位 |
 | `-b` | 允许写 BL 保护区；`0x80000`、`0x82000` 场景不需要 |
